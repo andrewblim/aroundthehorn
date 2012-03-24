@@ -1,0 +1,14 @@
+
+{
+	"name": "Around the Horn",
+	"version": "0.1",
+	"description": "Firehose application for MLB game data",
+	"app": {
+		"launch": {
+			"local_path": "main.html"
+		}
+	},
+	"permissions": [
+		"http://gd2.mlb.com/"
+	]
+}
