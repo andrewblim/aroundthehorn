@@ -43,7 +43,7 @@ $(document).ready(function() {
 			
 			for (var i = 0; i < games.length; i++) {
 				li = $("<li />");
-				li.text(games[i].id);
+				li.text(games[i].away_name_abbrev + ' @ ' + games[i].home_name_abbrev);
 				$("#gameList").append(li);
 			}
 			
