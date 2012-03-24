@@ -34,7 +34,7 @@ $(document).ready(function() {
 							"/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
 							"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
 							"/miniscoreboard.json";
-							
+		
 		$.get(scoreboardURL, function(data) { 
 			
 			var li;
