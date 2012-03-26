@@ -79,20 +79,27 @@ li.event:hover {
 	background-color: #FFFFD0;
 }
 
+.eventTimestamp {
+	display: table-cell;
+	margin: 0
+	padding: 0.5em;
+	width: 15em;
+	font-size: 75%;
+	vertical-align: middle;
+}
+
 .eventScoreboard {
 	display: table-cell;
 	margin: 0;
 	padding: 0.5em;
-	width: 5em;
-	float: left;
-	clear: both;
+	width: 7em;
 	font-weight: bold;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 .eventDescription {
 	display: table-cell;
 	margin: 0;
 	padding: 0.5em;
-	vertical-align: top;
+	vertical-align: middle;
 }

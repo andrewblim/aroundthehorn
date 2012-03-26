@@ -26,10 +26,12 @@ function populateScoreboard() {
 					"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
 					"/miniscoreboard.xml";
 	
+	$('#eventList').empty();
+	
 	$.get(scoreboardURL, function(data) { 
 		
 		var gameBox, gameBoxData, gameBoxCheckBox;
-		$("#gameList").empty();
+		$('#gameList').empty();
 		
 		games = $(data).find('game').each(function() {
 			
@@ -64,6 +66,7 @@ function populateScoreboard() {
 			
 		});
 		
+		$('#gameList > li.gameBox').tsort();
 		displayEvents();
 		
 	});
@@ -71,8 +74,6 @@ function populateScoreboard() {
 }
 
 function displayEvents() {
-	
-	$('#eventList').empty();
 	
 	$('#gameList').children().each(function() {
 		
@@ -83,30 +84,45 @@ function displayEvents() {
 					  "/gid_" + $(this).data('gameday');
 						
 		var inningURL = gameURL + "/inning/inning_all.xml";
-		var scoreboardURL = gameURL + "/miniscoreboard.xml";
 		
 		var homeTeam, homeR, awayTeam, awayR, inning, inningHalf;
 		
+		gameID = $(this).data('id');
 		homeTeam = $(this).data('homeTeam');
 		awayTeam = $(this).data('awayTeam');
 		
 		$.get(inningURL, function(data) {
-			
-			var gameEvent;
-			var gameEvents = [];
-			
+				
 			$(data).find('atbat').each(function() {
-				gameEvent = $('<li class="event" />');
-				gameEvent.append($('<div class="eventDescription">' + $(this).attr('des') + '</div>'));
-				gameEvents.push(gameEvent);
+				
+				var gameEvent;
+				var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
+				
+				var gameEventText = $(this).attr('des');
+				var gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
+				var gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
+											 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+				
+				gameEvent = $('<li class="event ' + gameID + '" />');
+				gameEvent.append($('<div class="eventTimestamp">' + gameEventZulu.toTimeString() + '</div>'));
+				gameEvent.append($('<div class="eventScoreboard">' + homeTeam + ' @ ' + awayTeam + '</div>'));
+				gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
+				
+				gameEvent.data('zulu', gameEventZulu);
+				
+				$('#eventList').append(gameEvent);
+				
 			});
-
-			for (var i = 0; i < gameEvents.length; i++) { 
-				gameEvents[i].prepend($('<div class="eventScoreboard">' + homeTeam + ' ' + awayTeam + '</div>'));
-				$('#eventList').append(gameEvents[i]); 
-			}
+			/*
+			$('#eventList > li.event').tsort({
+				sortFunction: function(a,b) {
+					if (a.data('zulu') < b.data('zulu')) { return 1; }
+					else if (a.data('zulu') > b.data('zulu')) { return -1; }
+					else { return 0; }
+				}
+			});*/
+			$('#eventList > li.event').tsort({ order: 'desc' });
 		});
-		
 	});
 	
 }
