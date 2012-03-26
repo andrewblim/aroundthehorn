@@ -1,5 +1,5 @@
 
-var gamedataURL = "http://gd2.mlb.com/components/game/mlb/";
+var gamedayURL = "http://gd2.mlb.com/components/game/mlb";
 
 function setAsOfDate(date) {
 	var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -20,7 +20,8 @@ function populateScoreboard() {
 	
 	asOfDate = new Date(Date.parse($("#asOfDate").attr("value")));
 	
-	scoreboardURL = "http://gd2.mlb.com/components/game/mlb/year_" + asOfDate.getFullYear() + 
+	scoreboardURL = gamedayURL + 
+					"/year_" + asOfDate.getFullYear() + 
 					"/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
 					"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
 					"/miniscoreboard.xml";
@@ -75,13 +76,14 @@ function displayEvents() {
 	
 	$('#gameList').children().each(function() {
 		
-		var gamedayURL = "http://gd2.mlb.com/components/game/mlb/year_" + asOfDate.getFullYear() +
-						"/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
-						"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
-						"/gid_" + $(this).data('gameday') + "/";
+		var gameURL = gamedayURL + 
+					  "/year_" + asOfDate.getFullYear() +
+					  "/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
+					  "/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
+					  "/gid_" + $(this).data('gameday');
 						
-		var inningURL = gamedayURL + "inning/inning_all.xml";
-		var scoreboardURL = gamedayURL + "miniscoreboard.xml";
+		var inningURL = gameURL + "/inning/inning_all.xml";
+		var scoreboardURL = gameURL + "/miniscoreboard.xml";
 		
 		var homeTeam, homeR, awayTeam, awayR, inning, inningHalf;
 		
