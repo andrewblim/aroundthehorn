@@ -1,8 +1,98 @@
 
 body {
 	font-family: Helvetica, Arial, sans-serif;
+	font-size: 11pt;
+	padding: 1em;
 }
 
 h1 {
 	font-size: 18pt;
+	margin: 0;
+}
+
+#slogan {
+	font-size: 75%;
+	margin-bottom: 2em;
+}
+
+#eventSelector {
+	margin: 0 0 2em 0;
+}
+
+#gameListWrap {
+	display: block;
+	overflow: auto;
+	background-color: #F0F0F0;
+	padding: 0.25em 0.5em 1em 0.5em;
+	border: solid thin;
+}
+
+#gameListAsOfDate {
+	margin: 0.5em;
+	padding: 0;
+	font-size: 90%;
+	font-weight: bold;
+}
+
+#gameList {
+	margin: 0;
+	padding: 0;
+}
+
+li.gameBox {
+	float: left;
+	list-style-type: none;
+	border: solid thin;
+	margin: 0.5em;
+	padding: 0.25em;
+	background-color: #D0FFD0;
+	font-size: 75%;
+	font-weight: bold;
+	width: 9.5em;
+	cursor: pointer;
+}
+
+li.gameBox:hover {
+	background-color: #FFFFD0;
+}
+
+span.gameBoxData {
+	margin-left: 0.5em;
+}
+
+#eventList {
+	margin: 0;
+	padding: 0;
+	display: table;
+}
+
+li.event {
+	display: table-row;
+	list-style-type: none;
+	margin: 0.5em 0 0.5em 0;
+	padding: 0;
+	background-color: inherit;
+	width: 90%;
+}
+
+li.event:hover {
+	background-color: #FFFFD0;
+}
+
+.eventScoreboard {
+	display: table-cell;
+	margin: 0;
+	padding: 0.5em;
+	width: 5em;
+	float: left;
+	clear: both;
+	font-weight: bold;
+	vertical-align: top;
+}
+
+.eventDescription {
+	display: table-cell;
+	margin: 0;
+	padding: 0.5em;
+	vertical-align: top;
 }

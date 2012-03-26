@@ -10,16 +10,24 @@
 		<script src="aroundthehorn.js"></script>
 	</head>
 	<body>
+		
 		<h1>Around the Horn</h1>
+		<p id="slogan">For those who like to feed on baseball.</p>
+		
 		<div id="eventSelector">
-			<p>
-				As of date: <input type="text" id="asOfDate" readonly="readonly" />
-			</p>
-			<ul id="gameList">
+			<div id="gameListWrap">
+				<div id="gameListAsOfDate">
+					As of date: <input type="text" id="asOfDate" size="18" readonly="readonly" />
+				</div>
+				<ul id="gameList">
+				</ul>
+			</div>
+		</div>
+		
+		<div id="events">
+			<ul id="eventList">
 			</ul>
 		</div>
-		<div id="events">
-			<p>List of events goes here.</p>
-		</div>
+		
 	</body>
 </html>
