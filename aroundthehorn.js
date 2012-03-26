@@ -34,7 +34,7 @@ function populateScoreboard() {
 			
 			gameBox = $('<li class="gameBox" />');
 			gameBoxData = $('<span class="gameBoxData" />');
-			gameBoxCheckBox = $('<input type="checkbox" />');
+			gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
 			
 			gameBox.data('id', $(this).attr('id'));
 			gameBox.data('gameday', $(this).attr('id').replace(/[\-\/]/g, '_'));
@@ -128,5 +128,12 @@ $(document).ready(function() {
 	
 	setAsOfDate(asOfDate);
 	populateScoreboard();
-
+	
+	$('#selectAll').click(function() { 
+		$('input.gameBoxCheckBox').each(function() { $(this).prop('checked', true); });
+	});
+	$('#deselectAll').click(function() { 
+		$('input.gameBoxCheckBox').each(function() { $(this).prop('checked', false); });
+	});
+	
 });
