@@ -14,6 +14,20 @@ function padNumber(number, pad, places) {
 	return Array(Math.max(places - number.toString().length, 0) + 1).join(pad) + number;
 }
 
+function zuluTimeToString(zuluTime) {
+	
+	var zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000);
+	var retString = '';
+	if (zuluTimeLocal.getDate() < asOfDate.getDate()) { retString += '(-1d) '; }
+	else if (zuluTimeLocal.getDate() > asOfDate.getDate()) { retString += '(+1d) '; }
+	
+	retString += padNumber(zuluTimeLocal.getHours(), 0, 2) + ':' +
+				 padNumber(zuluTimeLocal.getMinutes(), 0, 2) + ':' + 
+				 padNumber(zuluTimeLocal.getSeconds(), 0, 2);
+	return retString;
+	
+}
+
 function populateScoreboard() {
 	
 	var scoreboardURL;
@@ -106,14 +120,7 @@ function displayEvents() {
 											 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
 				
 				gameEvent = $('<li class="event ' + gameID + '" />');
-				// gameEvent.append($('<div>' + gameURL + ' ' + homeTeam + ' ' + awayTeam + '</div>'))
-				
-				// still need to fix timestamping and sorting
-				gameEvent.append($('<div class="eventTimestamp">' + 
-					padNumber((24 + gameEventZulu.getHours() - (gameEventZulu.getTimezoneOffset() / 60)) % 24, 0, 2) + ':' + 
-					padNumber(gameEventZulu.getMinutes(), 0, 2) + ':' + 
-					padNumber(gameEventZulu.getSeconds(), 0, 2) + '</div>'));
-				
+				gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
 				gameEvent.append($('<div class="eventScoreboard">' + homeTeam + ' @ ' + awayTeam + '</div>'));
 				gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
 				
