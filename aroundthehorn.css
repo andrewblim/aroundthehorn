@@ -69,7 +69,7 @@ span.gameBoxData {
 li.event {
 	display: table-row;
 	list-style-type: none;
-	margin: 0.5em 0 0.5em 0;
+	margin: 0.5em;
 	padding: 0;
 	background-color: inherit;
 	width: 90%;
@@ -81,25 +81,55 @@ li.event:hover {
 
 .eventTimestamp {
 	display: table-cell;
-	margin: 0
-	padding: 0.5em;
-	width: 10em;
+	margin: 0;
+	padding: 0.5em 2em 0.5em 0.5em;
+	width: 9em;
 	font-size: 75%;
 	vertical-align: middle;
+	text-align: right;
 }
 
 .eventScoreboard {
 	display: table-cell;
 	margin: 0;
 	padding: 0.5em;
-	width: 12em;
+	width: 4.5em;
 	font-weight: bold;
 	vertical-align: middle;
+}
+
+.eventScoreboardWrap {
+	display: table;
+	width: 4.5em;
+}
+
+.eventScoreboardInning {
+	display: table-cell;
+	font-size: 75%;
+}
+
+.eventScoreboardAway {
+	display: table-row;
+}
+
+.eventScoreboardHome {
+	display: table-row;
+}
+
+.eventScoreboardTeam {
+	display: table-cell;
+	width: 3.5em;
+	text-align: left;
+}
+
+.eventScoreboardScore {
+	display: table-cell;
+	text-align: right;
 }
 
 .eventDescription {
 	display: table-cell;
 	margin: 0;
-	padding: 0.5em;
+	padding: 0.5em 0.5em 0.5em 2em;
 	vertical-align: middle;
 }

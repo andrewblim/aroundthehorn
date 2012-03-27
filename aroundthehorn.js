@@ -1,5 +1,9 @@
 
+// globals ////////////////////////////////////////////////////////////////////
+
 var gamedayURL = "http://gd2.mlb.com/components/game/mlb";
+
+// helper functions ///////////////////////////////////////////////////////////
 
 function setAsOfDate(date) {
 	var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -27,7 +31,7 @@ function zuluTimeToString(zuluTime) {
 	
 	var hours = ((zuluTimeLocal.getHours() + 11) % 12) + 1;
 	
-	retString += padNumber(hours, 0, 2) + ':' +
+	retString += hours + ':' +
 				 padNumber(zuluTimeLocal.getMinutes(), 0, 2) + ':' + 
 				 padNumber(zuluTimeLocal.getSeconds(), 0, 2);
 	
@@ -37,6 +41,8 @@ function zuluTimeToString(zuluTime) {
 	return retString;
 	
 }
+
+// functions //////////////////////////////////////////////////////////////////
 
 function populateScoreboard() {
 	
@@ -118,33 +124,64 @@ function displayEvents() {
 		var homeTeam = $(this).data('homeTeam');
 		var awayTeam = $(this).data('awayTeam');
 		
-		// add some handling in case a game is not found (progress bar)
-		// also still missing "actions"
-		
 		$.get(inningURL, function(data) {
 			
-			$(data).find('atbat').each(function() {
+			$(data).children('game').each(function() {
 				
-				var gameEvent;
+				var inning, atbat, gameEvent;
+				var gameEventText, gameEventZuluRaw, gameEventZulu, gameEventInning;
+				var inningNumber = 1, atbatNumber = 1;
+				var inningHalves = ['top', 'bottom'];
 				var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 				
-				var gameEventText = $(this).attr('des');
-				var gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
-				var gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
-											 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
-				var gameEventInning = $(this).parent().parent().attr('num');
-				if ($(this).parent().is('top')) { gameEventInning = 'TOP ' + gameEventInning; }
-				else if ($(this).parent().is('bottom')) { gameEventInning = 'BOT ' + gameEventInning; }
+				var homeR = 0, awayR = 0;
 				
-				gameEvent = $('<li class="event ' + gameID + '" />');
-				gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-				gameEvent.append($('<div class="eventScoreboard">' + homeTeam + ' @ ' + awayTeam + ' - ' + 
-								   gameEventInning + '</div>'));
-				gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
+				// iterate over inning number, then top/bottom, then atbat number
+				// not using .each() because it should work regardless of the order
+				// of the data in the XML doc
 				
-				gameEvent.data('zulu', gameEventZulu.valueOf());
-				
-				$('#eventList').append(gameEvent);
+				for (;; inningNumber++) {
+					inning = $(this).children('inning[num=' + inningNumber + ']');
+					if (inning.length == 0) { break; }
+					for (var i = 0; i < inningHalves.length; i++) {
+						for (;; atbatNumber++) {
+							
+							atbat = inning.children(inningHalves[i]).children('atbat[num=' + atbatNumber + ']');
+							if (atbat.length == 0) { break; }
+
+							gameEventText = atbat.attr('des');
+							gameEventZuluRaw = gameEventZuluRegexp.exec(atbat.attr('start_tfs_zulu'));
+							gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
+														 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+							
+							gameEventInning = inningNumber;
+							if (inningHalves[i] == 'top') { gameEventInning = 'TOP ' + gameEventInning; }
+							else if (inningHalves[i] == 'bottom') { gameEventInning = 'BOT ' + gameEventInning; }
+							
+							if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
+							if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
+
+							gameEvent = $('<li class="event ' + gameID + '" />');
+							gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
+							gameEvent.append($('<div class="eventScoreboard"><div class="eventScoreboardWrap">' + 
+											   '<div class="eventScoreboardInning">' + gameEventInning + '</div>' +
+											   '<div class="eventScoreboardAway">' + 
+											   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
+											   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
+											   '</div><div class="eventScoreboardHome">' + 
+											   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
+											   '<div class="eventScoreboardScore">' + homeR + '</div>' +
+											   '</div></div></div>'));
+							
+							gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
+
+							gameEvent.data('zulu', gameEventZulu.valueOf());
+
+							$('#eventList').append(gameEvent);
+							
+						}
+					}
+				}
 				
 			});
 
@@ -160,7 +197,7 @@ function displayEvents() {
 }
 
 
-// "main" //////////////////////////////////////////
+// "main" /////////////////////////////////////////////////////////////////////
 
 $(document).ready(function() {
 	
