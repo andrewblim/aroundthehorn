@@ -52,15 +52,18 @@ function populateScoreboard() {
 			
 			gameBox.click(function() { 
 				var checkBox = $($(this).children('input'));
-				if (checkBox.prop('checked')) { checkBox.prop('checked', false); }
-				else { checkBox.prop('checked', true); }
+				if (checkBox.prop('checked')) { 
+					checkBox.prop('checked', false);
+					$('li.' + $(this).data('gameday')).css('display', 'none'); 
+				}
+				else { 
+					checkBox.prop('checked', true); 
+					$('li.' + $(this).data('gameday')).css('display', 'table-row'); 
+				}
 			});
 			
-			// this one should override the above click() bind on the checkbox itself
-			gameBoxCheckBox.click(function() { 
-				if ($(this).prop('checked')) { $(this).prop('checked', false); }
-				else { $(this).prop('checked', true); }
-			});
+			// fixes clicking on the checkbox itself
+			gameBoxCheckBox.click(function() { $(this).parent().click(); });
 			
 			$('#gameList').append(gameBox);
 			
@@ -85,14 +88,13 @@ function displayEvents() {
 						
 		var inningURL = gameURL + "/inning/inning_all.xml";
 		
-		var homeTeam, homeR, awayTeam, awayR, inning, inningHalf;
+		var gameID = $(this).data('gameday');
+		var homeTeam = $(this).data('homeTeam');
+		var awayTeam = $(this).data('awayTeam');
 		
-		gameID = $(this).data('id');
-		homeTeam = $(this).data('homeTeam');
-		awayTeam = $(this).data('awayTeam');
-		
+		// add some handling in case a game is not found
 		$.get(inningURL, function(data) {
-				
+			
 			$(data).find('atbat').each(function() {
 				
 				var gameEvent;
@@ -104,7 +106,14 @@ function displayEvents() {
 											 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
 				
 				gameEvent = $('<li class="event ' + gameID + '" />');
-				gameEvent.append($('<div class="eventTimestamp">' + gameEventZulu.toTimeString() + '</div>'));
+				// gameEvent.append($('<div>' + gameURL + ' ' + homeTeam + ' ' + awayTeam + '</div>'))
+				
+				// still need to fix timestamping and sorting
+				gameEvent.append($('<div class="eventTimestamp">' + 
+					padNumber((24 + gameEventZulu.getHours() - (gameEventZulu.getTimezoneOffset() / 60)) % 24, 0, 2) + ':' + 
+					padNumber(gameEventZulu.getMinutes(), 0, 2) + ':' + 
+					padNumber(gameEventZulu.getSeconds(), 0, 2) + '</div>'));
+				
 				gameEvent.append($('<div class="eventScoreboard">' + homeTeam + ' @ ' + awayTeam + '</div>'));
 				gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
 				
@@ -113,14 +122,8 @@ function displayEvents() {
 				$('#eventList').append(gameEvent);
 				
 			});
-			/*
-			$('#eventList > li.event').tsort({
-				sortFunction: function(a,b) {
-					if (a.data('zulu') < b.data('zulu')) { return 1; }
-					else if (a.data('zulu') > b.data('zulu')) { return -1; }
-					else { return 0; }
-				}
-			});*/
+
+			
 			$('#eventList > li.event').tsort({ order: 'desc' });
 		});
 	});
@@ -148,10 +151,14 @@ $(document).ready(function() {
 	populateScoreboard();
 	
 	$('#selectAll').click(function() { 
-		$('input.gameBoxCheckBox').each(function() { $(this).prop('checked', true); });
+		$('li.gameBox').each(function() { 
+			if ($(this).children('input.gameBoxCheckBox').prop('checked') == false) { $(this).click(); } 
+		});
 	});
 	$('#deselectAll').click(function() { 
-		$('input.gameBoxCheckBox').each(function() { $(this).prop('checked', false); });
+		$('li.gameBox').each(function() { 
+			if ($(this).children('input.gameBoxCheckBox').prop('checked') == true) { $(this).click(); } 
+		});
 	});
 	
 });
