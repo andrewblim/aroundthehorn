@@ -18,12 +18,22 @@ function zuluTimeToString(zuluTime) {
 	
 	var zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000);
 	var retString = '';
-	if (zuluTimeLocal.getDate() < asOfDate.getDate()) { retString += '(-1d) '; }
-	else if (zuluTimeLocal.getDate() > asOfDate.getDate()) { retString += '(+1d) '; }
+	if (zuluTimeLocal.getDate() < asOfDate.getDate()) { 
+		retString += '(' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) '; 
+	}
+	else if (zuluTimeLocal.getDate() > asOfDate.getDate()) { 
+		retString += '(+' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) '; 
+	}
 	
-	retString += padNumber(zuluTimeLocal.getHours(), 0, 2) + ':' +
+	var hours = ((zuluTimeLocal.getHours() + 11) % 12) + 1;
+	
+	retString += padNumber(hours, 0, 2) + ':' +
 				 padNumber(zuluTimeLocal.getMinutes(), 0, 2) + ':' + 
 				 padNumber(zuluTimeLocal.getSeconds(), 0, 2);
+	
+	if (zuluTimeLocal.getHours() < 12) { retString += ' AM'; }
+	else { retString += ' PM'; }
+	
 	return retString;
 	
 }
@@ -33,6 +43,8 @@ function populateScoreboard() {
 	var scoreboardURL;
 	
 	asOfDate = new Date(Date.parse($("#asOfDate").attr("value")));
+	// need to fix this to prevent annoying rollovers around midnight;
+	// should be in settings
 	
 	scoreboardURL = gamedayURL + 
 					"/year_" + asOfDate.getFullYear() + 
@@ -106,7 +118,9 @@ function displayEvents() {
 		var homeTeam = $(this).data('homeTeam');
 		var awayTeam = $(this).data('awayTeam');
 		
-		// add some handling in case a game is not found
+		// add some handling in case a game is not found (progress bar)
+		// also still missing "actions"
+		
 		$.get(inningURL, function(data) {
 			
 			$(data).find('atbat').each(function() {
@@ -118,20 +132,28 @@ function displayEvents() {
 				var gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
 				var gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
 											 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+				var gameEventInning = $(this).parent().parent().attr('num');
+				if ($(this).parent().is('top')) { gameEventInning = 'TOP ' + gameEventInning; }
+				else if ($(this).parent().is('bottom')) { gameEventInning = 'BOT ' + gameEventInning; }
 				
 				gameEvent = $('<li class="event ' + gameID + '" />');
 				gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-				gameEvent.append($('<div class="eventScoreboard">' + homeTeam + ' @ ' + awayTeam + '</div>'));
+				gameEvent.append($('<div class="eventScoreboard">' + homeTeam + ' @ ' + awayTeam + ' - ' + 
+								   gameEventInning + '</div>'));
 				gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
 				
-				gameEvent.data('zulu', gameEventZulu);
+				gameEvent.data('zulu', gameEventZulu.valueOf());
 				
 				$('#eventList').append(gameEvent);
 				
 			});
 
 			
-			$('#eventList > li.event').tsort({ order: 'desc' });
+			$('#eventList > li.event').tsort({ 
+				sortFunction: function(a,b) {
+					return b.e.data('zulu') - a.e.data('zulu');
+				} 
+			});
 		});
 	});
 	
@@ -159,12 +181,16 @@ $(document).ready(function() {
 	
 	$('#selectAll').click(function() { 
 		$('li.gameBox').each(function() { 
-			if ($(this).children('input.gameBoxCheckBox').prop('checked') == false) { $(this).click(); } 
+			if ($(this).children('input.gameBoxCheckBox').prop('checked') == false) { 
+				$(this).click(); 
+			} 
 		});
 	});
 	$('#deselectAll').click(function() { 
 		$('li.gameBox').each(function() { 
-			if ($(this).children('input.gameBoxCheckBox').prop('checked') == true) { $(this).click(); } 
+			if ($(this).children('input.gameBoxCheckBox').prop('checked') == true) { 
+				$(this).click(); 
+			} 
 		});
 	});
 	

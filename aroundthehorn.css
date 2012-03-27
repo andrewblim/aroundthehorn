@@ -83,7 +83,7 @@ li.event:hover {
 	display: table-cell;
 	margin: 0
 	padding: 0.5em;
-	width: 9em;
+	width: 10em;
 	font-size: 75%;
 	vertical-align: middle;
 }
@@ -92,7 +92,7 @@ li.event:hover {
 	display: table-cell;
 	margin: 0;
 	padding: 0.5em;
-	width: 7em;
+	width: 12em;
 	font-weight: bold;
 	vertical-align: middle;
 }
