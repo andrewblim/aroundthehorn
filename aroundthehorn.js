@@ -132,85 +132,98 @@ function displayEvents() {
 		var homeTeam = $(this).data('homeTeam');
 		var awayTeam = $(this).data('awayTeam');
 		
-		$.get(inningURL, function(data) {
+		$.get(playersURL, function(playersData) {
 			
-			$(data).children('game').each(function() {
+			var players = {};
+			$(playersData).find('player').each(function() {
+				players[$(this).attr('id')] = {
+					first: $(this).attr('first'),
+					last: $(this).attr('last'),
+					number: $(this).attr('num'),
+					shortName: $(this).attr('boxname')
+				}
+			});
+			
+			$.get(inningURL, function(inningData) {
+			
+				$(inningData).children('game').each(function() {
 				
-				var inning, atbat, gameEvent, inningHalf;
-				var gameEventText, gameEventZuluRaw, gameEventZulu;
-				var inningNumber = 1, atbatNumber = 1;
-				var inningHalves = ['top', 'bottom'];
-				var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
+					var inning, atbat, gameEvent, inningHalf;
+					var gameEventText, gameEventZuluRaw, gameEventZulu;
+					var inningNumber = 1, atbatNumber = 1;
+					var inningHalves = ['top', 'bottom'];
+					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 				
-				var homeR = 0, awayR = 0;
-				var balls, strikes, outs;
+					var homeR = 0, awayR = 0;
+					var balls, strikes, outs;
 				
-				// iterate over inning number, then top/bottom, then atbat number
-				// not using .each() because it should work regardless of the order
-				// of the data in the XML doc
+					// iterate over inning number, then top/bottom, then atbat number
+					// not using .each() because it should work regardless of the order
+					// of the data in the XML doc
 				
-				for (;; inningNumber++) {
-					inning = $(this).children('inning[num=' + inningNumber + ']');
-					if (inning.length == 0) { break; }
-					for (var i = 0; i < inningHalves.length; i++) {
-						if (inningHalves[i] == 'top') { inningHalf = 'Top'; }
-						else if (inningHalves[i] == 'bottom') { inningHalf = 'Bot'; }
-						for (;; atbatNumber++) {
+					for (;; inningNumber++) {
+						inning = $(this).children('inning[num=' + inningNumber + ']');
+						if (inning.length == 0) { break; }
+						for (var i = 0; i < inningHalves.length; i++) {
+							if (inningHalves[i] == 'top') { inningHalf = 'Top'; }
+							else if (inningHalves[i] == 'bottom') { inningHalf = 'Bot'; }
+							for (;; atbatNumber++) {
 							
-							atbat = inning.children(inningHalves[i]).children('atbat[num=' + atbatNumber + ']');
-							if (atbat.length == 0) { break; }
+								atbat = inning.children(inningHalves[i]).children('atbat[num=' + atbatNumber + ']');
+								if (atbat.length == 0) { break; }
 
-							gameEventText = atbat.attr('des');
-							gameEventZuluRaw = gameEventZuluRegexp.exec(atbat.attr('start_tfs_zulu'));
-							gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
-														 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+								gameEventText = atbat.attr('des');
+								gameEventZuluRaw = gameEventZuluRegexp.exec(atbat.attr('start_tfs_zulu'));
+								gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
+															 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
 							
-							if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
-							if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
+								if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
+								if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
 							
-							balls = atbat.attr('b');
-							strikes = atbat.attr('s');
-							outs = atbat.attr('o');
-							batterID = atbat.attr('batter');
-							pitcherID = atbat.attr('pitcher');
+								balls = atbat.attr('b');
+								strikes = atbat.attr('s');
+								outs = atbat.attr('o');
+								batterID = atbat.attr('batter');
+								pitcherID = atbat.attr('pitcher');
 
-							gameEvent = $('<li class="event ' + gameID + '" />');
-							gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-							gameEvent.append($('<div class="eventScoreboard"><div class="eventScoreboardWrap">' + 
-											   '<div class="eventScoreboardInning">' + inningHalf + ' ' + numberToOrdinal(inningNumber) + '</div>' +
-											   '<div class="eventScoreboardAway">' + 
-											   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
-											   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
-											   '</div><div class="eventScoreboardHome">' + 
-											   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
-											   '<div class="eventScoreboardScore">' + homeR + '</div>' +
-											   '</div><div class="eventScoreboardCount">' + balls + '-' + strikes + ', ' + outs + ' out' + '</div>' +
-											   '</div></div>'));
+								gameEvent = $('<li class="event ' + gameID + '" />');
+								gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
+								gameEvent.append($('<div class="eventScoreboard"><div class="eventScoreboardWrap">' + 
+												   '<div class="eventScoreboardInning">' + inningHalf + ' ' + numberToOrdinal(inningNumber) + '</div>' +
+												   '<div class="eventScoreboardAway">' + 
+												   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
+												   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
+												   '</div><div class="eventScoreboardHome">' + 
+												   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
+												   '<div class="eventScoreboardScore">' + homeR + '</div>' +
+												   '</div><div class="eventScoreboardCount">' + balls + '-' + strikes + ', ' + outs + ' out' + '</div>' +
+												   '</div></div>'));
 							
-							gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
-											   '<div class="eventAtBatPitcher">' + 
-											   '<div class="eventAtBatLabel">P:</div><div class="eventAtBatPlayer">' + pitcherID + '</div>' +
-											   '</div><div class="eventAtBatBatter">' + 
-											   '<div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + batterID + '</div>' +
-											   '</div></div></div>'));
+								gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
+												   '<div class="eventAtBatPitcher">' + 
+												   '<div class="eventAtBatLabel">P:</div><div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div>' +
+												   '</div><div class="eventAtBatBatter">' + 
+												   '<div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + players[batterID].shortName + '</div>' +
+												   '</div></div></div>'));
 							
-							gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
+								gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
 
-							gameEvent.data('zulu', gameEventZulu.valueOf());
+								gameEvent.data('zulu', gameEventZulu.valueOf());
 
-							$('#eventList').append(gameEvent);
+								$('#eventList').append(gameEvent);
 							
+							}
 						}
 					}
-				}
 				
-			});
-
+				});
 			
-			$('#eventList > li.event').tsort({ 
-				sortFunction: function(a,b) {
-					return b.e.data('zulu') - a.e.data('zulu');
-				} 
+				$('#eventList > li.event').tsort({ 
+					sortFunction: function(a,b) {
+						return b.e.data('zulu') - a.e.data('zulu');
+					} 
+				});
+				
 			});
 		});
 	});

@@ -121,7 +121,7 @@ li.event:hover {
 .eventAtBat {
 	display: table-cell;
 	vertical-align: middle;
-	width: 6em;
+	width: 8em;
 }
 
 .eventAtBatWrap {
