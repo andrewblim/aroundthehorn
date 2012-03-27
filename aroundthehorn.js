@@ -126,6 +126,7 @@ function displayEvents() {
 					  "/gid_" + $(this).data('gameday');
 						
 		var inningURL = gameURL + "/inning/inning_all.xml";
+		var playersURL = gameURL + "/players.xml";
 		
 		var gameID = $(this).data('gameday');
 		var homeTeam = $(this).data('homeTeam');
@@ -166,9 +167,12 @@ function displayEvents() {
 							
 							if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
 							if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
+							
 							balls = atbat.attr('b');
 							strikes = atbat.attr('s');
 							outs = atbat.attr('o');
+							batterID = atbat.attr('batter');
+							pitcherID = atbat.attr('pitcher');
 
 							gameEvent = $('<li class="event ' + gameID + '" />');
 							gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
@@ -182,6 +186,13 @@ function displayEvents() {
 											   '<div class="eventScoreboardScore">' + homeR + '</div>' +
 											   '</div><div class="eventScoreboardCount">' + balls + '-' + strikes + ', ' + outs + ' out' + '</div>' +
 											   '</div></div>'));
+							
+							gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
+											   '<div class="eventAtBatPitcher">' + 
+											   '<div class="eventAtBatLabel">P:</div><div class="eventAtBatPlayer">' + pitcherID + '</div>' +
+											   '</div><div class="eventAtBatBatter">' + 
+											   '<div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + batterID + '</div>' +
+											   '</div></div></div>'));
 							
 							gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
 

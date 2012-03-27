@@ -93,33 +93,19 @@ li.event:hover {
 	display: table-cell;
 	margin: 0;
 	padding: 0.5em;
-	width: 4.5em;
+	width: 5em;
 	font-weight: bold;
 	vertical-align: middle;
 }
 
 .eventScoreboardWrap {
 	display: table;
-	width: 4.5em;
 }
 
-.eventScoreboardInning {
-	display: table-row;
-	font-size: 75%;
-}
-
-.eventScoreboardCount {
-	display: table-row;
-	font-size: 75%;
-}
-
-.eventScoreboardAway {
-	display: table-row;
-}
-
-.eventScoreboardHome {
-	display: table-row;
-}
+.eventScoreboardInning { display: table-row; font-size: 75%; }
+.eventScoreboardCount { display: table-row; font-size: 75%; }
+.eventScoreboardAway { display: table-row; }
+.eventScoreboardHome { display: table-row; }
 
 .eventScoreboardTeam {
 	display: table-cell;
@@ -132,9 +118,32 @@ li.event:hover {
 	text-align: right;
 }
 
+.eventAtBat {
+	display: table-cell;
+	vertical-align: middle;
+	width: 6em;
+}
+
+.eventAtBatWrap {
+	display: table;
+}
+
+.eventAtBatPitcher { display: table-row; }
+.eventAtBatBatter { display: table-row; }
+
+.eventAtBatLabel {
+	display: table-cell;
+	text-align: right;
+	padding: 0 0.5em 0 0;
+	font-size: 75%;
+}
+
+.eventAtBatPlayer {
+	display: table-cell;
+	font-size: 75%;
+}
+
 .eventDescription {
 	display: table-cell;
-	margin: 0;
-	padding: 0.5em 0.5em 0.5em 2em;
 	vertical-align: middle;
 }
