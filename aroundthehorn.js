@@ -14,6 +14,13 @@ function setAsOfDate(date) {
 								 date.getFullYear());
 }
 
+function numberToOrdinal(n) {
+	if ((n % 10) == 1 && (n % 100) != 11) { return n + 'st'; }
+	else if ((n % 10) == 2 && (n % 100) != 12) { return n + 'nd'; }
+	else if ((n % 10) == 3 && (n % 100) != 13) { return n + 'rd'; }
+	else { return n + 'th'; }
+}
+
 function padNumber(number, pad, places) {
 	return Array(Math.max(places - number.toString().length, 0) + 1).join(pad) + number;
 }
@@ -128,13 +135,14 @@ function displayEvents() {
 			
 			$(data).children('game').each(function() {
 				
-				var inning, atbat, gameEvent;
-				var gameEventText, gameEventZuluRaw, gameEventZulu, gameEventInning;
+				var inning, atbat, gameEvent, inningHalf;
+				var gameEventText, gameEventZuluRaw, gameEventZulu;
 				var inningNumber = 1, atbatNumber = 1;
 				var inningHalves = ['top', 'bottom'];
 				var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 				
 				var homeR = 0, awayR = 0;
+				var balls, strikes, outs;
 				
 				// iterate over inning number, then top/bottom, then atbat number
 				// not using .each() because it should work regardless of the order
@@ -144,6 +152,8 @@ function displayEvents() {
 					inning = $(this).children('inning[num=' + inningNumber + ']');
 					if (inning.length == 0) { break; }
 					for (var i = 0; i < inningHalves.length; i++) {
+						if (inningHalves[i] == 'top') { inningHalf = 'Top'; }
+						else if (inningHalves[i] == 'bottom') { inningHalf = 'Bot'; }
 						for (;; atbatNumber++) {
 							
 							atbat = inning.children(inningHalves[i]).children('atbat[num=' + atbatNumber + ']');
@@ -154,24 +164,24 @@ function displayEvents() {
 							gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
 														 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
 							
-							gameEventInning = inningNumber;
-							if (inningHalves[i] == 'top') { gameEventInning = 'TOP ' + gameEventInning; }
-							else if (inningHalves[i] == 'bottom') { gameEventInning = 'BOT ' + gameEventInning; }
-							
 							if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
 							if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
+							balls = atbat.attr('b');
+							strikes = atbat.attr('s');
+							outs = atbat.attr('o');
 
 							gameEvent = $('<li class="event ' + gameID + '" />');
 							gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
 							gameEvent.append($('<div class="eventScoreboard"><div class="eventScoreboardWrap">' + 
-											   '<div class="eventScoreboardInning">' + gameEventInning + '</div>' +
+											   '<div class="eventScoreboardInning">' + inningHalf + ' ' + numberToOrdinal(inningNumber) + '</div>' +
 											   '<div class="eventScoreboardAway">' + 
 											   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
 											   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
 											   '</div><div class="eventScoreboardHome">' + 
 											   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
 											   '<div class="eventScoreboardScore">' + homeR + '</div>' +
-											   '</div></div></div>'));
+											   '</div><div class="eventScoreboardCount">' + balls + '-' + strikes + ', ' + outs + ' out' + '</div>' +
+											   '</div></div>'));
 							
 							gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
 

@@ -104,7 +104,12 @@ li.event:hover {
 }
 
 .eventScoreboardInning {
-	display: table-cell;
+	display: table-row;
+	font-size: 75%;
+}
+
+.eventScoreboardCount {
+	display: table-row;
 	font-size: 75%;
 }
 
