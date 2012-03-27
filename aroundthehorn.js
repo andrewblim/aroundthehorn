@@ -125,7 +125,7 @@ function displayEvents() {
 					  "/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
 					  "/gid_" + $(this).data('gameday');
 						
-		var inningURL = gameURL + "/inning/inning_all.xml";
+		var inningURL = gameURL + "/game_events.xml"; 
 		var playersURL = gameURL + "/players.xml";
 		
 		var gameID = $(this).data('gameday');
@@ -155,7 +155,7 @@ function displayEvents() {
 					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 				
 					var homeR = 0, awayR = 0;
-					var balls, strikes, outs;
+					var outs, batterID, pitcherID, onFirstID, onSecondID, onThirdID;
 				
 					// iterate over inning number, then top/bottom, then atbat number
 					// not using .each() because it should work regardless of the order
@@ -174,30 +174,27 @@ function displayEvents() {
 
 								gameEventText = atbat.attr('des');
 								gameEventZuluRaw = gameEventZuluRegexp.exec(atbat.attr('start_tfs_zulu'));
-								gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], 
-															 gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+								gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
 							
 								if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
 								if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
 							
-								balls = atbat.attr('b');
-								strikes = atbat.attr('s');
 								outs = atbat.attr('o');
 								batterID = atbat.attr('batter');
 								pitcherID = atbat.attr('pitcher');
 
 								gameEvent = $('<li class="event ' + gameID + '" />');
 								gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-								gameEvent.append($('<div class="eventScoreboard"><div class="eventScoreboardWrap">' + 
-												   '<div class="eventScoreboardInning">' + inningHalf + ' ' + numberToOrdinal(inningNumber) + '</div>' +
+								gameEvent.append($('<div class="eventScoreboard">' + 
+												   '<div class="eventScoreboardInning">' + inningHalf + ' ' + numberToOrdinal(inningNumber) + ', ' + outs + ' out</div>' +
+												   '<div class="eventScoreboardWrap">' + 
 												   '<div class="eventScoreboardAway">' + 
 												   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
 												   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
 												   '</div><div class="eventScoreboardHome">' + 
 												   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
 												   '<div class="eventScoreboardScore">' + homeR + '</div>' +
-												   '</div><div class="eventScoreboardCount">' + balls + '-' + strikes + ', ' + outs + ' out' + '</div>' +
-												   '</div></div>'));
+												   '</div></div></div>'));
 							
 								gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
 												   '<div class="eventAtBatPitcher">' + 
