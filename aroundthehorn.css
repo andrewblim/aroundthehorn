@@ -10,9 +10,33 @@ h1 {
 	margin: 0;
 }
 
+h2 {
+	font-size: 14pt;
+	margin: 0;
+}
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
 #slogan {
 	font-size: 80%;
 	margin-bottom: 2em;
+}
+
+#menu {
+	font-size: 80%;
+	font-weight: bold;
+	position: absolute;
+	top: 1em;
+	right: 3em;
+	border: solid thin black;
+	padding: 0.5em;
+}
+
+li.menuItem {
+	display: inline;
+	list-style-type: none;
+	margin: 0 1em;
 }
 
 #eventSelector {
@@ -114,6 +138,8 @@ li.event:hover {
 	text-align: right;
 }
 
+.scoreChanged { color: red; }
+
 .eventAtBat {
 	display: table-cell;
 	vertical-align: middle;
@@ -141,3 +167,5 @@ li.event:hover {
 	vertical-align: middle;
 	padding: 0.5em;
 }
+
+.scoringPlay { font-weight: bold; }

@@ -125,7 +125,7 @@ function displayEvents() {
 					  "/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
 					  "/gid_" + $(this).data('gameday');
 						
-		var inningURL = gameURL + "/game_events.xml"; 
+		var inningURL = gameURL + "/inning/inning_all.xml"; 
 		var playersURL = gameURL + "/players.xml";
 		
 		var gameID = $(this).data('gameday');
@@ -156,7 +156,9 @@ function displayEvents() {
 					var inning, inningHalf, inningDescription;
 					var gameEvent, gameEventText, gameEventZuluRaw, gameEventZulu;
 					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
-				
+					
+					var pitches;
+					
 					var homeR = 0, awayR = 0;
 					var outs, batterID, pitcherID, onFirstID, onSecondID, onThirdID;
 					outs = 0;
@@ -168,28 +170,54 @@ function displayEvents() {
 					// out of order events
 					// handling certain actions, pinch hitters/runners, pickoffs, etc. 
 					
-					$(this).find('atbat').each(function() {
+					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
 						
 						inning = $(this).parent().parent().attr('num');
 						if ($(this).parent().is('top')) { inningHalf = 'Top'; }
 						else if ($(this).parent().is('bottom')) { inningHalf = 'Bot'; }
 						
-						gameEventText = $(this).attr('des');
+						if ($(this).attr('o') != undefined) { outs = $(this).attr('o'); }
+						if ($(this).attr('des') != undefined) { gameEventText = $(this).attr('des'); }
 						
-						if ($(this).is('atbat')) { 
-							gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
+						if ($(this).is('atbat')) {
+							
+							pitches = $(this).children('pitch');
+							if (pitches.length > 0) {
+								gameEventZuluRaw = gameEventZuluRegexp.exec(pitches.last().attr('tfs_zulu'));
+							}
+							else {
+								gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
+							}
+							if ($(this).attr('batter') != undefined) { batterID = $(this).attr('batter'); }
+							if ($(this).attr('pitcher') != undefined) { pitcherID = $(this).attr('pitcher'); }
+							
 						}
 						else {
+							
 							gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('tfs_zulu'));
+							
+							// on action tags we want the batter/pitcher of the next atbat
+							// because actions are listed prior to the atbat they occurred in
+							
+							if ($(this).nextAll('atbat').length > 0) {
+							 	batterID = $(this).nextAll('atbat').first().attr('batter');
+								pitcherID = $(this).nextAll('atbat').first().attr('pitcher');
+							}
+							
 						}
 						
 						gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
 						
-						if ($(this).attr('home_team_runs') != undefined) { homeR = $(this).attr('home_team_runs'); }
-						if ($(this).attr('away_team_runs') != undefined) { awayR = $(this).attr('away_team_runs'); }
-						if ($(this).attr('o') != undefined) { outs = $(this).attr('o'); }
-						if ($(this).attr('batter') != undefined) { batterID = $(this).attr('batter'); }
-						if ($(this).attr('pitcher') != undefined) { pitcherID = $(this).attr('pitcher'); }
+						homeRchanged = false;
+						awayRchanged = false;
+						if ($(this).attr('home_team_runs') != undefined) {
+							if (homeR != $(this).attr('home_team_runs')) { homeRchanged = true; }
+							homeR = $(this).attr('home_team_runs'); 
+						}
+						if ($(this).attr('away_team_runs') != undefined) { 
+							if (awayR != $(this).attr('away_team_runs')) { awayRchanged = true; }
+							awayR = $(this).attr('away_team_runs'); 
+						}
 						
 						inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', ' + outs + ' out';
 						if ($(this) == $(this).parent().children().eq(0)) {
@@ -206,10 +234,10 @@ function displayEvents() {
 										   '<div class="eventScoreboardWrap">' + 
 										   '<div class="eventScoreboardAway">' + 
 										   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
-										   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
+										   '<div class="eventScoreboardScore' + (awayRchanged ? ' scoreChanged' : '') + '">' + awayR + '</div>' + 
 										   '</div><div class="eventScoreboardHome">' + 
 										   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
-										   '<div class="eventScoreboardScore">' + homeR + '</div>' +
+										   '<div class="eventScoreboardScore' + (homeRchanged ? ' scoreChanged' : '') + '">' + homeR + '</div>' +
 										   '</div></div></div>'));
 					
 						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
@@ -223,7 +251,7 @@ function displayEvents() {
 										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">3rd:</div><div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div></div>' +
 										   '</div></div>'));
 					
-						gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
+						gameEvent.append($('<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'));
 						
 						// b1-b3 show base status _after_ the event, which is not what I want to show
 						// therefore they are assigned here
@@ -256,6 +284,8 @@ $(document).ready(function() {
 	
 	var asOfDate = new Date();
 	var scoreboardData;
+	
+	$('#menu').css('right', $('#eventSelector').position().left);
 
 	$('#asOfDate').datepicker({
 		dateFormat: 'D d M yy',
