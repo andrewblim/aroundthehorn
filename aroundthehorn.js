@@ -158,17 +158,17 @@ function displayEvents() {
 					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 					
 					var pitches;
-					
 					var homeR = 0, awayR = 0;
-					var outs, batterID, pitcherID, onFirstID, onSecondID, onThirdID;
+					var outs, isThirdOut;
+					var batterID, pitcherID, onFirstID, onSecondID, onThirdID;
+					var prevOnFirstID, prevOnSecondID, prevOnThirdID, tempID;
 					outs = 0;
 					onFirstID = '';
 					onSecondID = '';
 					onThirdID = '';
 					
-					// still problems: 
-					// out of order events
-					// handling certain actions, pinch hitters/runners, pickoffs, etc. 
+					// still problems: moving runners on actions
+					// comes up on SB/CS/PO, error on PO, WP/PB, balks
 					
 					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
 						
@@ -176,7 +176,11 @@ function displayEvents() {
 						if ($(this).parent().is('top')) { inningHalf = 'Top'; }
 						else if ($(this).parent().is('bottom')) { inningHalf = 'Bot'; }
 						
-						if ($(this).attr('o') != undefined) { outs = $(this).attr('o'); }
+						isThirdOut = false;
+						if ($(this).attr('o') != undefined) { 
+							outs = $(this).attr('o'); 
+							if (outs == 3) isThirdOut = true;
+						}
 						if ($(this).attr('des') != undefined) { gameEventText = $(this).attr('des'); }
 						
 						if ($(this).is('atbat')) {
@@ -219,7 +223,7 @@ function displayEvents() {
 							awayR = $(this).attr('away_team_runs'); 
 						}
 						
-						inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', ' + outs + ' out';
+						inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', <span class="eventScoreboardOuts">' + outs + ' out</span>';
 						if ($(this) == $(this).parent().children().eq(0)) {
 							outs = 0;
 							onFirstID = '';
@@ -245,7 +249,7 @@ function displayEvents() {
 										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + players[batterID].shortName + '</div></div>' +
 										   '</div></div>'));
 										
-						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
+						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap ' + (isThirdOut ? ' eventAtBatThirdOut' : '') + '">' + 
 										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">1st:</div><div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div></div>' +
 										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">2nd:</div><div class="eventAtBatPlayer">' + (onSecondID == '' ? '' : players[onSecondID].shortName) + '</div></div>' +
 										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">3rd:</div><div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div></div>' +
@@ -253,11 +257,27 @@ function displayEvents() {
 					
 						gameEvent.append($('<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'));
 						
-						// b1-b3 show base status _after_ the event, which is not what I want to show
-						// therefore they are assigned here
-						if ($(this).attr('b1') != undefined) { onFirstID = $(this).attr('b1'); }
-						if ($(this).attr('b2') != undefined) { onSecondID = $(this).attr('b2'); }
-						if ($(this).attr('b3') != undefined) { onThirdID = $(this).attr('b3'); }
+						if ($(this).is('atbat')) {
+							if (isThirdOut) {
+								onFirstID = '';
+								onSecondID = '';
+								onThirdID = '';
+							}
+							else {
+								prevOnFirstID = onFirstID;
+								prevOnSecondID = onSecondID;
+								prevOnThirdID = onThirdID;
+								$(this).children('runner').each(function() {
+									if ($(this).attr('start') == '') { tempID = batterID; }
+									else if ($(this).attr('start') == '1B') { tempID = prevOnFirstID; if (onFirstID == prevOnFirstID) { onFirstID = ''; } }
+									else if ($(this).attr('start') == '2B') { tempID = prevOnSecondID; if (onSecondID == prevOnSecondID) { onSecondID = ''; } }
+									else if ($(this).attr('start') == '3B') { tempID = prevOnThirdID; if (onThirdID == prevOnThirdID) { onThirdID = ''; } }
+									if ($(this).attr('end') == '1B') { onFirstID = tempID; }
+									else if ($(this).attr('end') == '2B') { onSecondID = tempID; }
+									else if ($(this).attr('end') == '3B') { onThirdID = tempID; }
+								});
+							}
+						}
 						
 						gameEvent.data('zulu', gameEventZulu.valueOf());
 						$('#eventList').append(gameEvent);
