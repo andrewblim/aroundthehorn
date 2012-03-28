@@ -117,13 +117,12 @@ li.event:hover {
 .eventAtBat {
 	display: table-cell;
 	vertical-align: middle;
-	width: 9em;
+	width: 7.5em;
 	padding: 0.5em 0.5em 0.5em 0.5em;
 }
 
 .eventAtBatWrap { display: table; }
-.eventAtBatPitcher { display: table-row; }
-.eventAtBatBatter { display: table-row; }
+.eventAtBatPosition { display: table-row; }
 
 .eventAtBatLabel {
 	display: table-cell;
@@ -140,4 +139,5 @@ li.event:hover {
 .eventDescription {
 	display: table-cell;
 	vertical-align: middle;
+	padding: 0.5em;
 }

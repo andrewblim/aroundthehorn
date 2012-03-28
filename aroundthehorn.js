@@ -135,6 +135,7 @@ function displayEvents() {
 		$.get(playersURL, function(playersData) {
 			
 			var players = {};
+			
 			$(playersData).find('player').each(function() {
 				players[$(this).attr('id')] = {
 					first: $(this).attr('first'),
@@ -146,73 +147,94 @@ function displayEvents() {
 			
 			$.get(inningURL, function(inningData) {
 			
+				// Relies on each game_events.xml file presenting the data in 
+				// chronological order, in order to correctly capture runs and
+				// men on base. 
+				
 				$(inningData).children('game').each(function() {
 				
-					var inning, atbat, gameEvent, inningHalf;
-					var gameEventText, gameEventZuluRaw, gameEventZulu;
-					var inningNumber = 1, atbatNumber = 1;
-					var inningHalves = ['top', 'bottom'];
+					var inning, inningHalf, inningDescription;
+					var gameEvent, gameEventText, gameEventZuluRaw, gameEventZulu;
 					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 				
 					var homeR = 0, awayR = 0;
 					var outs, batterID, pitcherID, onFirstID, onSecondID, onThirdID;
-				
-					// iterate over inning number, then top/bottom, then atbat number
-					// not using .each() because it should work regardless of the order
-					// of the data in the XML doc
-				
-					for (;; inningNumber++) {
-						inning = $(this).children('inning[num=' + inningNumber + ']');
-						if (inning.length == 0) { break; }
-						for (var i = 0; i < inningHalves.length; i++) {
-							if (inningHalves[i] == 'top') { inningHalf = 'Top'; }
-							else if (inningHalves[i] == 'bottom') { inningHalf = 'Bot'; }
-							for (;; atbatNumber++) {
-							
-								atbat = inning.children(inningHalves[i]).children('atbat[num=' + atbatNumber + ']');
-								if (atbat.length == 0) { break; }
-
-								gameEventText = atbat.attr('des');
-								gameEventZuluRaw = gameEventZuluRegexp.exec(atbat.attr('start_tfs_zulu'));
-								gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
-							
-								if (atbat.attr('home_team_runs') != undefined) { homeR = atbat.attr('home_team_runs'); }
-								if (atbat.attr('away_team_runs') != undefined) { awayR = atbat.attr('away_team_runs'); }
-							
-								outs = atbat.attr('o');
-								batterID = atbat.attr('batter');
-								pitcherID = atbat.attr('pitcher');
-
-								gameEvent = $('<li class="event ' + gameID + '" />');
-								gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-								gameEvent.append($('<div class="eventScoreboard">' + 
-												   '<div class="eventScoreboardInning">' + inningHalf + ' ' + numberToOrdinal(inningNumber) + ', ' + outs + ' out</div>' +
-												   '<div class="eventScoreboardWrap">' + 
-												   '<div class="eventScoreboardAway">' + 
-												   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
-												   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
-												   '</div><div class="eventScoreboardHome">' + 
-												   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
-												   '<div class="eventScoreboardScore">' + homeR + '</div>' +
-												   '</div></div></div>'));
-							
-								gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
-												   '<div class="eventAtBatPitcher">' + 
-												   '<div class="eventAtBatLabel">P:</div><div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div>' +
-												   '</div><div class="eventAtBatBatter">' + 
-												   '<div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + players[batterID].shortName + '</div>' +
-												   '</div></div></div>'));
-							
-								gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
-
-								gameEvent.data('zulu', gameEventZulu.valueOf());
-
-								$('#eventList').append(gameEvent);
-							
-							}
+					outs = 0;
+					onFirstID = '';
+					onSecondID = '';
+					onThirdID = '';
+					
+					// still problems: 
+					// out of order events
+					// handling certain actions, pinch hitters/runners, pickoffs, etc. 
+					
+					$(this).find('atbat').each(function() {
+						
+						inning = $(this).parent().parent().attr('num');
+						if ($(this).parent().is('top')) { inningHalf = 'Top'; }
+						else if ($(this).parent().is('bottom')) { inningHalf = 'Bot'; }
+						
+						gameEventText = $(this).attr('des');
+						
+						if ($(this).is('atbat')) { 
+							gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
 						}
-					}
-				
+						else {
+							gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('tfs_zulu'));
+						}
+						
+						gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+						
+						if ($(this).attr('home_team_runs') != undefined) { homeR = $(this).attr('home_team_runs'); }
+						if ($(this).attr('away_team_runs') != undefined) { awayR = $(this).attr('away_team_runs'); }
+						if ($(this).attr('o') != undefined) { outs = $(this).attr('o'); }
+						if ($(this).attr('batter') != undefined) { batterID = $(this).attr('batter'); }
+						if ($(this).attr('pitcher') != undefined) { pitcherID = $(this).attr('pitcher'); }
+						
+						inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', ' + outs + ' out';
+						if ($(this) == $(this).parent().children().eq(0)) {
+							outs = 0;
+							onFirstID = '';
+							onSecondID = '';
+							onThirdID = '';
+						}
+						
+						gameEvent = $('<li class="event ' + gameID + '" />');
+						gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
+						gameEvent.append($('<div class="eventScoreboard">' + 
+										   '<div class="eventScoreboardInning">' + inningDescription + '</div>' +
+										   '<div class="eventScoreboardWrap">' + 
+										   '<div class="eventScoreboardAway">' + 
+										   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
+										   '<div class="eventScoreboardScore">' + awayR + '</div>' + 
+										   '</div><div class="eventScoreboardHome">' + 
+										   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
+										   '<div class="eventScoreboardScore">' + homeR + '</div>' +
+										   '</div></div></div>'));
+					
+						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
+										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">P:</div><div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div></div>' +
+										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + players[batterID].shortName + '</div></div>' +
+										   '</div></div>'));
+										
+						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
+										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">1st:</div><div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div></div>' +
+										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">2nd:</div><div class="eventAtBatPlayer">' + (onSecondID == '' ? '' : players[onSecondID].shortName) + '</div></div>' +
+										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">3rd:</div><div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div></div>' +
+										   '</div></div>'));
+					
+						gameEvent.append($('<div class="eventDescription">' + gameEventText + '</div>'));
+						
+						// b1-b3 show base status _after_ the event, which is not what I want to show
+						// therefore they are assigned here
+						if ($(this).attr('b1') != undefined) { onFirstID = $(this).attr('b1'); }
+						if ($(this).attr('b2') != undefined) { onSecondID = $(this).attr('b2'); }
+						if ($(this).attr('b3') != undefined) { onThirdID = $(this).attr('b3'); }
+						
+						gameEvent.data('zulu', gameEventZulu.valueOf());
+						$('#eventList').append(gameEvent);
+						
+					});
 				});
 			
 				$('#eventList > li.event').tsort({ 
