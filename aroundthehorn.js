@@ -69,24 +69,49 @@ function populateScoreboard() {
 	
 	$.get(scoreboardURL, function(data) { 
 		
-		var gameBox, gameBoxData, gameBoxCheckBox;
+		var gameBox, gameBoxCheckBox, gameBoxData, gameBoxStatus, gameBoxStatusDescription;
 		$('#gameList').empty();
 		
 		games = $(data).find('game').each(function() {
 			
 			gameBox = $('<li class="gameBox" />');
-			gameBoxData = $('<span class="gameBoxData" />');
-			gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
-			
 			gameBox.data('id', $(this).attr('id'));
 			gameBox.data('gameday', $(this).attr('id').replace(/[\-\/]/g, '_'));
-			// no idea why $(this).attr('gameday') doesn't work, by the way
+			// not sure why $(this).attr('gameday') doesn't work
 			gameBox.data('homeTeam', $(this).attr('home_name_abbrev'));
 			gameBox.data('awayTeam', $(this).attr('away_name_abbrev'));
+			gameBox.data('homeTeamR', $(this).attr('home_team_runs'));
+			gameBox.data('awayTeamR', $(this).attr('away_team_runs'));
 			
+			gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
 			gameBoxCheckBox.prop('checked', true);
 			gameBox.append(gameBoxCheckBox);
-			gameBoxData.text($(this).attr('away_name_abbrev') + ' @ ' + $(this).attr('home_name_abbrev'));
+			
+			gameBoxData = $('<div class="gameBoxData" />');
+			gameBoxData.append($('<span>' + 
+							   gameBox.data('awayTeam') + ' ' + 
+							   (gameBox.data('awayTeamR') == undefined ? '' : gameBox.data('awayTeamR') + ' ') + '@ ' + 
+							   gameBox.data('homeTeam') + ' ' + 
+							   (gameBox.data('homeTeamR') == undefined ? '' : gameBox.data('homeTeamR')) + 
+							   '</span>'));
+			gameBoxData.append($('<br/>'));
+			
+			gameBoxStatus = $('<span class="gameBoxStatus" />');
+			if ($(this).attr('status').toLowerCase() == "in progress") {
+				if ($(this).attr('top_inning').toLowerCase() == 'y') { gameBoxStatusDescription = 'Top '; }
+				else { gameBoxStatusDescription = 'Bot '; }
+				gameBoxStatus.text(gameBoxStatusDescription + numberToOrdinal($(this).attr('inning')));
+			}
+			else if ($(this).attr('status').toLowerCase() == "final") {
+				if ($(this).attr('inning') != 9) { gameBoxStatus.text('Final (' + $(this).attr('inning') + ')'); }
+				else { gameBoxStatus.text('Final'); }
+			}
+			else if ($(this).attr('status') != undefined) {
+				gameBoxStatus.text($(this).attr('status'));
+			}
+			else { gameBoxStatus.html('&nbsp;') }
+			gameBoxData.append(gameBoxStatus);
+			
 			gameBox.append(gameBoxData);
 			
 			gameBox.click(function() { 
@@ -162,6 +187,7 @@ function displayEvents() {
 					var outs, isThirdOut;
 					var batterID, pitcherID, onFirstID, onSecondID, onThirdID;
 					var prevOnFirstID, prevOnSecondID, prevOnThirdID, tempID;
+					
 					outs = 0;
 					onFirstID = '';
 					onSecondID = '';
@@ -304,8 +330,6 @@ $(document).ready(function() {
 	
 	var asOfDate = new Date();
 	var scoreboardData;
-	
-	$('#menu').css('right', $('#eventSelector').position().left);
 
 	$('#asOfDate').datepicker({
 		dateFormat: 'D d M yy',
