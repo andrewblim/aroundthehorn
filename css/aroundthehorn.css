@@ -139,19 +139,20 @@ li.event:hover {
 .eventScoreboardInning { display: block; font-size: 75%; width: 100%; }
 .eventScoreboardOuts { display: inline; }
 
-.eventScoreboardWrap { display: table; width: 80%; }
+.eventScoreboardWrap { display: table; width: 5em; }
 .eventScoreboardAway { display: table-row; }
 .eventScoreboardHome { display: table-row; }
 
 .eventScoreboardTeam {
 	display: table-cell;
-	width: 3.5em;
+	width: 3em;
 	text-align: left;
 }
 
 .eventScoreboardScore {
 	display: table-cell;
 	text-align: right;
+	width: 2em;
 }
 
 .scoreChanged { color: red; }
