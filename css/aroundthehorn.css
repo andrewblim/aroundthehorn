@@ -86,9 +86,7 @@ li.gameBox {
 	cursor: pointer;
 }
 
-li.gameBox:hover {
-	background-color: #FFFFD0;
-}
+li.gameBox:hover { background-color: #FFFFD0; }
 
 .gameBoxCheckBox {
 	float: left;
@@ -96,9 +94,9 @@ li.gameBox:hover {
 	margin: 0.5em;
 }
 
-.gameBoxData { 
-	margin: 0.25em;
-}
+.gameBoxData { margin: 0.25em; }
+.gameBoxScoreline { display: block; }
+.gameBoxStatus { display: block; }
 
 #eventList {
 	margin: 0;
@@ -167,7 +165,7 @@ li.event:hover {
 
 .eventAtBatWrap { display: table; }
 .eventAtBatPosition { display: table-row; }
-.eventAtBatThirdOut { color: silver; text-decoration: line-through; }
+.eventAtBatThirdOut { color: #A0A0A0; text-decoration: line-through; }
 
 .eventAtBatLabel {
 	display: table-cell;

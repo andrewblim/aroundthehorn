@@ -1,10 +1,8 @@
 
 Thu:
-- fix actions that move men on base
 - fix the date rollover issue
 - populate settings and help pages
 - add a "Loading" message/progress bar
-- code efficiency/cleanup break
 
 Fri: 
 - add a player filter
@@ -13,3 +11,4 @@ Fri:
 
 Sat: 
 - add icons
+- use only jqueryui necessary

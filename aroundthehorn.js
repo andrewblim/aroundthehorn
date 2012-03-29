@@ -8,10 +8,7 @@ var gamedayURL = "http://gd2.mlb.com/components/game/mlb";
 function setAsOfDate(date) {
 	var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	$("#asOfDate").attr("value", dayNames[date.getDay()] + ' ' +
-								 date.getDate() + ' ' + 
-							   	 monthNames[date.getMonth()] + ' ' + 
-								 date.getFullYear());
+	$("#asOfDate").attr("value", dayNames[date.getDay()] + ' ' + date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear());
 }
 
 function numberToOrdinal(n) {
@@ -25,15 +22,24 @@ function padNumber(number, pad, places) {
 	return Array(Math.max(places - number.toString().length, 0) + 1).join(pad) + number;
 }
 
+function zuluTimestampToDate(zuluTime) {
+	if (zuluTime == undefined) return undefined;
+	var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
+	var gameEventZuluRaw = gameEventZuluRegexp.exec(zuluTime);
+	return new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+	
+}
+
 function zuluTimeToString(zuluTime) {
 	
 	var zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000);
 	var retString = '';
+	
 	if (zuluTimeLocal.getDate() < asOfDate.getDate()) { 
-		retString += '(' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) '; 
+		retString = '(' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) ';
 	}
 	else if (zuluTimeLocal.getDate() > asOfDate.getDate()) { 
-		retString += '(+' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) '; 
+		retString += '(+' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) ';
 	}
 	
 	var hours = ((zuluTimeLocal.getHours() + 11) % 12) + 1;
@@ -46,35 +52,29 @@ function zuluTimeToString(zuluTime) {
 	else { retString += ' PM'; }
 	
 	return retString;
-	
 }
 
 // functions //////////////////////////////////////////////////////////////////
 
 function populateScoreboard() {
 	
-	var scoreboardURL;
-	
 	asOfDate = new Date(Date.parse($("#asOfDate").attr("value")));
-	// need to fix this to prevent annoying rollovers around midnight;
-	// should be in settings
 	
-	scoreboardURL = gamedayURL + 
-					"/year_" + asOfDate.getFullYear() + 
-					"/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
-					"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
-					"/miniscoreboard.xml";
+	var scoreboardURL = gamedayURL + 
+						"/year_" + asOfDate.getFullYear() + 
+						"/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
+						"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
+						"/miniscoreboard.xml";
 	
 	$('#eventList').empty();
 	
 	$.get(scoreboardURL, function(data) { 
 		
-		var gameBox, gameBoxCheckBox, gameBoxData, gameBoxStatus, gameBoxStatusDescription;
 		$('#gameList').empty();
 		
 		games = $(data).find('game').each(function() {
 			
-			gameBox = $('<li class="gameBox" />');
+			var gameBox = $('<li class="gameBox" />');
 			gameBox.data('id', $(this).attr('id'));
 			gameBox.data('gameday', $(this).attr('id').replace(/[\-\/]/g, '_'));
 			// not sure why $(this).attr('gameday') doesn't work
@@ -82,46 +82,52 @@ function populateScoreboard() {
 			gameBox.data('awayTeam', $(this).attr('away_name_abbrev'));
 			gameBox.data('homeTeamR', $(this).attr('home_team_runs'));
 			gameBox.data('awayTeamR', $(this).attr('away_team_runs'));
+			$('#gameList').append(gameBox);
 			
-			var ampm, timeRaw, timeRegExp = /(\d+):(\d\d)/;
+			var ampm = 0, timeRaw;
 			if ($(this).attr('ampm').toUpperCase() == "PM") { ampm = 12; }
-			else { ampm = 0; }
-			timeRaw = timeRegExp.exec($(this).attr('time'));
+			timeRaw =  /(\d+):(\d\d)/.exec($(this).attr('time'));
 			gameBox.data('startTime', asOfDate.valueOf() + ((timeRaw[1] + ampm) * 60 + timeRaw[2]) * 1000);
 			
-			gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
+			var gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
 			gameBoxCheckBox.prop('checked', true);
 			gameBox.append(gameBoxCheckBox);
 			
+			var gameBoxData;
 			gameBoxData = $('<div class="gameBoxData" />');
-			gameBoxData.append($('<span>' + 
-							   gameBox.data('awayTeam') + ' ' + 
-							   (gameBox.data('awayTeamR') == undefined ? '' : gameBox.data('awayTeamR') + ' ') + '@ ' + 
-							   gameBox.data('homeTeam') + ' ' + 
-							   (gameBox.data('homeTeamR') == undefined ? '' : gameBox.data('homeTeamR')) + 
-							   '</span>'));
-			gameBoxData.append($('<br/>'));
+			gameBox.append(gameBoxData);
 			
-			gameBoxStatus = $('<span class="gameBoxStatus" />');
-			if ($(this).attr('status').toLowerCase() == "in progress") {
-				if ($(this).attr('top_inning').toLowerCase() == 'y') { gameBoxStatusDescription = 'Top '; }
-				else { gameBoxStatusDescription = 'Bot '; }
-				gameBoxStatus.text(gameBoxStatusDescription + numberToOrdinal($(this).attr('inning')));
+			var gameBoxScoreline = $('<div class="gameBoxScoreline">');
+			gameBoxScoreline.text(gameBox.data('awayTeam') + ' ' + 
+								  (gameBox.data('awayTeamR') == undefined ? '' : gameBox.data('awayTeamR') + ' ') + '@ ' + 
+								  gameBox.data('homeTeam') + ' ' + 
+								  (gameBox.data('homeTeamR') == undefined ? '' : gameBox.data('homeTeamR')));
+			gameBoxData.append(gameBoxScoreline);
+			
+			var gameBoxStatus = $('<div class="gameBoxStatus" />');
+			var gameStatus = $(this).attr('status').toLowerCase();
+			var inning = $(this).attr('inning');
+			var topInning = $(this).attr('top_inning');
+			
+			if (gameStatus == "in progress") {
+				if (topInning.toLowerCase() == 'y') { gameBoxStatus.text('Top ' + numberToOrdinal(inning)); }
+				else { gameBoxStatus.text('Bot ' + numberToOrdinal(inning)); }
 			}
-			else if ($(this).attr('status').toLowerCase() == "final") {
-				if ($(this).attr('inning') != 9) { gameBoxStatus.text('Final (' + $(this).attr('inning') + ')'); }
+			else if (gameStatus == "final") {
+				if (inning != 9) { gameBoxStatus.text('Final (' + inning + ')'); }
 				else { gameBoxStatus.text('Final'); }
 			}
-			else if ($(this).attr('status').toLowerCase() == "preview") {
+			else if (gameStatus == "preview") {
 				gameBoxStatus.text($(this).attr('time') + ' ' + $(this).attr('ampm') + ' ' + $(this).attr('time_zone'));
 			}
-			else if ($(this).attr('status') != undefined) {
-				gameBoxStatus.text($(this).attr('status'));
+			else if (gameStatus == "pre-game" || gameStatus == "warmup") {
+				gameBoxStatus.text('Pregame');
+			}
+			else if (gameStatus != undefined) {
+				gameBoxStatus.text(gameStatus);
 			}
 			else { gameBoxStatus.html('&nbsp;') }
 			gameBoxData.append(gameBoxStatus);
-			
-			gameBox.append(gameBoxData);
 			
 			gameBox.click(function() { 
 				var checkBox = $($(this).children('input'));
@@ -138,8 +144,6 @@ function populateScoreboard() {
 			// fixes clicking on the checkbox itself
 			gameBoxCheckBox.click(function() { $(this).parent().click(); });
 			
-			$('#gameList').append(gameBox);
-			
 		});
 		
 		$('#gameList > li.gameBox').tsort({
@@ -154,10 +158,9 @@ function populateScoreboard() {
 				else { return 0; }
 			}
 		});
-		displayEvents();
 		
+		displayEvents();
 	});
-
 }
 
 function displayEvents() {
@@ -198,26 +201,12 @@ function displayEvents() {
 				
 				$(inningData).children('game').each(function() {
 				
-					var inning, inningHalf, inningDescription;
-					var gameEvent, gameEventText, gameEventZuluRaw, gameEventZulu;
-					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
+					var gameEventText, gameEventZulu;
+					var runnerIndex;
 					
-					var pitches;
-					
-					// action tags occur prior to the atbat in which they occur; 
-					// these are variables to correspond actions to "runner" 
-					// items in the next atbat
-					var runnerNumber, isRunnerAction; 
-					
-					var homeR = 0, awayR = 0;
-					var outs, isThirdOut;
-					var batterID, pitcherID, onFirstID, onSecondID, onThirdID;
+					var homeR = 0, awayR = 0, outs = 0;
+					var batterID = '', pitcherID = '', onFirstID = '', onSecondID = '', onThirdID = '';
 					var prevOnFirstID, prevOnSecondID, prevOnThirdID, tempID;
-					
-					outs = 0;
-					onFirstID = '';
-					onSecondID = '';
-					onThirdID = '';
 					
 					// still problems: moving runners on actions
 					// comes up on SB/CS/PO, error on PO, WP/PB, balks
@@ -225,48 +214,29 @@ function displayEvents() {
 					
 					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
 						
+						var inning, inningHalf;
 						inning = $(this).parent().parent().attr('num');
 						if ($(this).parent().is('top')) { inningHalf = 'Top'; }
 						else if ($(this).parent().is('bottom')) { inningHalf = 'Bot'; }
 						
-						isThirdOut = false;
-						if ($(this).attr('o') != undefined) { 
-							outs = $(this).attr('o'); 
-							if (outs == 3) isThirdOut = true;
-						}
+						if ($(this).attr('o') != undefined) { outs = $(this).attr('o'); }
 						if ($(this).attr('des') != undefined) { gameEventText = $(this).attr('des'); }
 						
 						if ($(this).is('atbat')) {
 							
-							runnerNumber = -1;
-							pitches = $(this).children('pitch');
+							runnerIndex = 0;
 							
-							if (pitches.length > 0) {
-								gameEventZuluRaw = gameEventZuluRegexp.exec(pitches.last().attr('tfs_zulu'));
-							}
-							else {
-								gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('start_tfs_zulu'));
-							}
+							var pitches = $(this).children('pitch');
+							if (pitches.length > 0) { gameEventZulu = zuluTimestampToDate(pitches.last().attr('tfs_zulu')); }
+							else { gameEventZulu = zuluTimestampToDate($(this).attr('start_tfs_zulu')); }
+							
 							if ($(this).attr('batter') != undefined) { batterID = $(this).attr('batter'); }
 							if ($(this).attr('pitcher') != undefined) { pitcherID = $(this).attr('pitcher'); }
 							
 						}
-						else {
+						else {  // .is('action')
 							
-							if ($(this).attr('event').slice(0,11).toLowerCase() == 'stolen base' ||
-								$(this).attr('event').toLowerCase() == 'defensive indiff' ||
-								$(this).attr('event').slice(0,15).toLowerCase() == 'caught stealing' ||
-								$(this).attr('event').toLowerCase() == 'wild pitch' ||
-								$(this).attr('event').toLowerCase() == 'passed ball' ||
-								$(this).attr('event').slice(0,10).toLowerCase() == 'picked off' ||
-								$(this).attr('event').toLowerCase() == 'balk'
-								) {
-								runnerNumber++;
-								isRunnerAction = true;
-							}
-							else { isRunnerAction = false; }
-							
-							gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('tfs_zulu'));
+							gameEventZulu = zuluTimestampToDate($(this).attr('tfs_zulu'));
 							
 							// on action tags we want the batter/pitcher of the next atbat
 							// because actions are listed prior to the atbat they occurred in
@@ -278,10 +248,8 @@ function displayEvents() {
 							
 						}
 						
-						gameEventZulu = new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
-						
-						homeRchanged = false;
-						awayRchanged = false;
+						var homeRchanged = false;
+						var awayRchanged = false;
 						if ($(this).attr('home_team_runs') != undefined) {
 							if (homeR != $(this).attr('home_team_runs')) { homeRchanged = true; }
 							homeR = $(this).attr('home_team_runs'); 
@@ -291,80 +259,119 @@ function displayEvents() {
 							awayR = $(this).attr('away_team_runs'); 
 						}
 						
-						inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', <span class="eventScoreboardOuts">' + outs + ' out</span>';
 						if ($(this) == $(this).parent().children().eq(0)) {
-							outs = 0;
-							onFirstID = '';
-							onSecondID = '';
-							onThirdID = '';
+							outs = 0; onFirstID = ''; onSecondID = ''; onThirdID = '';
 						}
 						
-						gameEvent = $('<li class="event ' + gameID + '" />');
+						var gameEvent = $('<li class="event ' + gameID + '" />');
+						gameEvent.data('zulu', gameEventZulu.valueOf());
+						$('#eventList').append(gameEvent);
+						
 						gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-						gameEvent.append($('<div class="eventScoreboard">' + 
-										   '<div class="eventScoreboardInning">' + inningDescription + '</div>' +
-										   '<div class="eventScoreboardWrap">' + 
-										   '<div class="eventScoreboardAway">' + 
-										   '<div class="eventScoreboardTeam">' + awayTeam + '</div>' + 
-										   '<div class="eventScoreboardScore' + (awayRchanged ? ' scoreChanged' : '') + '">' + awayR + '</div>' + 
-										   '</div><div class="eventScoreboardHome">' + 
-										   '<div class="eventScoreboardTeam">' + homeTeam + '</div>' + 
-										   '<div class="eventScoreboardScore' + (homeRchanged ? ' scoreChanged' : '') + '">' + homeR + '</div>' +
-										   '</div></div></div>'));
-					
-						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap">' + 
-										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">P:</div><div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div></div>' +
-										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">AB:</div><div class="eventAtBatPlayer">' + players[batterID].shortName + '</div></div>' +
-										   '</div></div>'));
-										
-						gameEvent.append($('<div class="eventAtBat"><div class="eventAtBatWrap ' + (isThirdOut ? ' eventAtBatThirdOut' : '') + '">' + 
-										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">1st:</div><div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div></div>' +
-										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">2nd:</div><div class="eventAtBatPlayer">' + (onSecondID == '' ? '' : players[onSecondID].shortName) + '</div></div>' +
-										   '<div class="eventAtBatPosition"><div class="eventAtBatLabel">3rd:</div><div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div></div>' +
-										   '</div></div>'));
+						
+						var gameEventScoreboard = $('<div class="eventScoreboard" />');
+						gameEvent.append(gameEventScoreboard);
+						
+						var inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', <span class="eventScoreboardOuts">' + outs + ' out</span>';
+						gameEventScoreboard.append('<div class="eventScoreboardInning">' + inningDescription + '</div>');
+						
+						var gameEventScoreboardWrap = $('<div class="eventScoreboardWrap" />');
+						gameEventScoreboard.append(gameEventScoreboardWrap);
+						
+						var gameEventScoreboardAway = $('<div class="eventScoreboardAway" />');
+						gameEventScoreboard.append(gameEventScoreboardAway);
+						gameEventScoreboardAway.append($('<div class="eventScoreboardTeam">' + awayTeam + '</div>'));
+						gameEventScoreboardAway.append($('<div class="eventScoreboardScore' + (awayRchanged ? ' scoreChanged' : '') + '">' + awayR + '</div>'));
+						var gameEventScoreboardHome = $('<div class="eventScoreboardHome" />');
+						gameEventScoreboard.append(gameEventScoreboardHome);
+						gameEventScoreboardHome.append($('<div class="eventScoreboardTeam">' + homeTeam + '</div>'));
+						gameEventScoreboardHome.append($('<div class="eventScoreboardScore' + (homeRchanged ? ' scoreChanged' : '') + '">' + homeR + '</div>'));
+						
+						var gameEventAtBat, gameEventAtBatWrap, gameEventAtBatPosition;
+						
+						gameEventAtBat = $('<div class="eventAtBat" />');
+						gameEvent.append(gameEventAtBat);
+						gameEventAtBatWrap = $('<div class="eventAtBatWrap" />');
+						gameEventAtBat.append(gameEventAtBatWrap);
+						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">P:</div>'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div>'));
+						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">AB:</div>'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + players[batterID].shortName + '</div>'));
+						
+						gameEventAtBat = $('<div class="eventAtBat" />');
+						gameEvent.append(gameEventAtBat);
+						gameEventAtBatWrap = $('<div class="eventAtBatWrap ' + (outs == 3 ? ' eventAtBatThirdOut' : '') + '" />');
+						gameEventAtBat.append(gameEventAtBatWrap);
+						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">1st:</div>'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div>'));
+						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">2nd:</div>'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + (onSecondID == '' ? '' : players[onSecondID].shortName) + '</div>'));
+						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">3rd:</div>'));
+						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div>'));
 					
 						gameEvent.append($('<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'));
 						
 						if ($(this).is('atbat')) {
-							if (isThirdOut) {
-								onFirstID = '';
-								onSecondID = '';
-								onThirdID = '';
-							}
-							else {
-								prevOnFirstID = onFirstID;
-								prevOnSecondID = onSecondID;
-								prevOnThirdID = onThirdID;
-								$(this).children('runner').each(function() {
-									if ($(this).attr('start') == '') { tempID = batterID; }
-									else if ($(this).attr('start') == '1B') { tempID = prevOnFirstID; if (onFirstID == prevOnFirstID) { onFirstID = ''; } }
-									else if ($(this).attr('start') == '2B') { tempID = prevOnSecondID; if (onSecondID == prevOnSecondID) { onSecondID = ''; } }
-									else if ($(this).attr('start') == '3B') { tempID = prevOnThirdID; if (onThirdID == prevOnThirdID) { onThirdID = ''; } }
-									if ($(this).attr('end') == '1B') { onFirstID = tempID; }
-									else if ($(this).attr('end') == '2B') { onSecondID = tempID; }
-									else if ($(this).attr('end') == '3B') { onThirdID = tempID; }
-								});
+							
+							prevOnFirstID = onFirstID;
+							prevOnSecondID = onSecondID;
+							prevOnThirdID = onThirdID;
+							$(this).children('runner').each(function() {
+								if ($(this).attr('start') == '') { tempID = batterID; }
+								else if ($(this).attr('start') == '1B') { tempID = prevOnFirstID; if (onFirstID == prevOnFirstID) { onFirstID = ''; } }
+								else if ($(this).attr('start') == '2B') { tempID = prevOnSecondID; if (onSecondID == prevOnSecondID) { onSecondID = ''; } }
+								else if ($(this).attr('start') == '3B') { tempID = prevOnThirdID; if (onThirdID == prevOnThirdID) { onThirdID = ''; } }
+								if ($(this).attr('end') == '1B') { onFirstID = tempID; }
+								else if ($(this).attr('end') == '2B') { onSecondID = tempID; }
+								else if ($(this).attr('end') == '3B') { onThirdID = tempID; }
+							});
+							
+						}
+						else {  // .is('action')
+							
+							var atBatEvent = $(this).next('atbat').children().eq(runnerIndex);
+							var atBatEventZulu;
+							while (atBatEvent.length > 0) {
+								
+								atBatEventZulu = zuluTimestampToDate(atBatEvent.attr('tfs_zulu'));
+								if (atBatEventZulu != undefined && atBatEventZulu > gameEventZulu) { break; }
+								
+								if (atBatEvent.is('runner')) {
+									
+									prevOnFirstID = onFirstID;
+									prevOnSecondID = onSecondID;
+									prevOnThirdID = onThirdID;
+									if (atBatEvent.attr('start') == '') { tempID = batterID; }
+									else if (atBatEvent.attr('start') == '1B') { tempID = prevOnFirstID; if (onFirstID == prevOnFirstID) { onFirstID = ''; } }
+									else if (atBatEvent.attr('start') == '2B') { tempID = prevOnSecondID; if (onSecondID == prevOnSecondID) { onSecondID = ''; } }
+									else if (atBatEvent.attr('start') == '3B') { tempID = prevOnThirdID; if (onThirdID == prevOnThirdID) { onThirdID = ''; } }
+									if (atBatEvent.attr('end') == '1B') { onFirstID = tempID; }
+									else if (atBatEvent.attr('end') == '2B') { onSecondID = tempID; }
+									else if (atBatEvent.attr('end') == '3B') { onThirdID = tempID; }
+								}
+								
+								atBatEvent = atBatEvent.next();
+								runnerIndex++;
+								
 							}
 						}
-						
-						gameEvent.data('zulu', gameEventZulu.valueOf());
-						$('#eventList').append(gameEvent);
 						
 					});
 				});
 			
 				$('#eventList > li.event').tsort({ 
-					sortFunction: function(a,b) {
-						return b.e.data('zulu') - a.e.data('zulu');
-					} 
+					sortFunction: function(a,b) { return b.e.data('zulu') - a.e.data('zulu'); } 
 				});
 				
 			});
 		});
 	});
-	
 }
-
 
 // "main" /////////////////////////////////////////////////////////////////////
 
