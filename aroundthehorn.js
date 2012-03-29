@@ -83,6 +83,12 @@ function populateScoreboard() {
 			gameBox.data('homeTeamR', $(this).attr('home_team_runs'));
 			gameBox.data('awayTeamR', $(this).attr('away_team_runs'));
 			
+			var ampm, timeRaw, timeRegExp = /(\d+):(\d\d)/;
+			if ($(this).attr('ampm').toUpperCase() == "PM") { ampm = 12; }
+			else { ampm = 0; }
+			timeRaw = timeRegExp.exec($(this).attr('time'));
+			gameBox.data('startTime', asOfDate.valueOf() + ((timeRaw[1] + ampm) * 60 + timeRaw[2]) * 1000);
+			
 			gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
 			gameBoxCheckBox.prop('checked', true);
 			gameBox.append(gameBoxCheckBox);
@@ -105,6 +111,9 @@ function populateScoreboard() {
 			else if ($(this).attr('status').toLowerCase() == "final") {
 				if ($(this).attr('inning') != 9) { gameBoxStatus.text('Final (' + $(this).attr('inning') + ')'); }
 				else { gameBoxStatus.text('Final'); }
+			}
+			else if ($(this).attr('status').toLowerCase() == "preview") {
+				gameBoxStatus.text($(this).attr('time') + ' ' + $(this).attr('ampm') + ' ' + $(this).attr('time_zone'));
 			}
 			else if ($(this).attr('status') != undefined) {
 				gameBoxStatus.text($(this).attr('status'));
@@ -133,7 +142,18 @@ function populateScoreboard() {
 			
 		});
 		
-		$('#gameList > li.gameBox').tsort();
+		$('#gameList > li.gameBox').tsort({
+			sortFunction: function(a,b) {
+				if (a.e.data('startTime') != b.e.data('startTime')) { 
+					return a.e.data('startTime') - b.e.data('startTime');
+				}
+				else if (a.e.data('awayTeam') > b.e.data('awayTeam')) { return 1; }
+				else if (a.e.data('awayTeam') < b.e.data('awayTeam')) { return -1; }
+				else if (a.e.data('homeTeam') > b.e.data('homeTeam')) { return 1; }
+				else if (a.e.data('homeTeam') < b.e.data('homeTeam')) { return -1; }
+				else { return 0; }
+			}
+		});
 		displayEvents();
 		
 	});
