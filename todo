@@ -1,0 +1,17 @@
+
+Wed: 
+- fix actions that move men on base
+
+Thu:
+- fix the date rollover issue
+- populate settings and help pages
+- add a "Loading" message/progress bar
+- code efficiency/cleanup break
+
+Fri: 
+- add a player filter
+- make it update live
+- add some error checks
+
+Sat: 
+- add icons

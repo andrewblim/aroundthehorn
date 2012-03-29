@@ -203,6 +203,12 @@ function displayEvents() {
 					var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
 					
 					var pitches;
+					
+					// action tags occur prior to the atbat in which they occur; 
+					// these are variables to correspond actions to "runner" 
+					// items in the next atbat
+					var runnerNumber, isRunnerAction; 
+					
 					var homeR = 0, awayR = 0;
 					var outs, isThirdOut;
 					var batterID, pitcherID, onFirstID, onSecondID, onThirdID;
@@ -215,6 +221,7 @@ function displayEvents() {
 					
 					// still problems: moving runners on actions
 					// comes up on SB/CS/PO, error on PO, WP/PB, balks
+					// if inning ends on CS/PO it gets duped
 					
 					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
 						
@@ -231,7 +238,9 @@ function displayEvents() {
 						
 						if ($(this).is('atbat')) {
 							
+							runnerNumber = -1;
 							pitches = $(this).children('pitch');
+							
 							if (pitches.length > 0) {
 								gameEventZuluRaw = gameEventZuluRegexp.exec(pitches.last().attr('tfs_zulu'));
 							}
@@ -243,6 +252,19 @@ function displayEvents() {
 							
 						}
 						else {
+							
+							if ($(this).attr('event').slice(0,11).toLowerCase() == 'stolen base' ||
+								$(this).attr('event').toLowerCase() == 'defensive indiff' ||
+								$(this).attr('event').slice(0,15).toLowerCase() == 'caught stealing' ||
+								$(this).attr('event').toLowerCase() == 'wild pitch' ||
+								$(this).attr('event').toLowerCase() == 'passed ball' ||
+								$(this).attr('event').slice(0,10).toLowerCase() == 'picked off' ||
+								$(this).attr('event').toLowerCase() == 'balk'
+								) {
+								runnerNumber++;
+								isRunnerAction = true;
+							}
+							else { isRunnerAction = false; }
 							
 							gameEventZuluRaw = gameEventZuluRegexp.exec($(this).attr('tfs_zulu'));
 							
