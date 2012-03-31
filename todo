@@ -3,12 +3,10 @@
 
 - fix the date rollover issue
 - populate settings and help pages
-- add a "Loading" message/progress bar
-- speed up loading? maybe moot the progress bar
+- speed up loading? 
  
 - add a player filter
 - make it update live
-- add some error checks
 
 Sat: 
 - add icons
