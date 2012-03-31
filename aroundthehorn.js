@@ -23,17 +23,23 @@ function padNumber(number, pad, places) {
 }
 
 function zuluTimestampToDate(zuluTime) {
-	if (zuluTime == undefined) return undefined;
-	var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
-	var gameEventZuluRaw = gameEventZuluRegexp.exec(zuluTime);
-	return new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
-	
+	try {
+		var gameEventZuluRegexp = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/;
+		var gameEventZuluRaw = gameEventZuluRegexp.exec(zuluTime);
+		return new Date(gameEventZuluRaw[1], gameEventZuluRaw[2]-1, gameEventZuluRaw[3], gameEventZuluRaw[4], gameEventZuluRaw[5], gameEventZuluRaw[6]);
+	}
+	catch (err) { return undefined; }
 }
 
 function zuluTimeToString(zuluTime) {
 	
-	var zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000);
+	var zuluTimeLocal; 
 	var retString = '';
+	
+	try {
+		zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000);
+	}
+	catch (err) { return undefined; }
 	
 	if (zuluTimeLocal.getDate() < asOfDate.getDate()) { 
 		retString = '(' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) ';
@@ -201,15 +207,16 @@ function displayEvents() {
 				
 				$(inningData).children('game').each(function() {
 				
-					var gameEventText, gameEventZulu;
+					var gameEventText, gameEventZulu, prevGameEventZulu;
 					var runnerIndex;
 					
 					var homeR = 0, awayR = 0, outs = 0;
 					var batterID = '', pitcherID = '', onFirstID = '', onSecondID = '', onThirdID = '';
 					var prevOnFirstID, prevOnSecondID, prevOnThirdID, tempID;
 					
-					// still problems: moving runners on actions
-					// comes up on SB/CS/PO, error on PO, WP/PB, balks
+					prevGameEventZulu = new Date(asOfDate);
+					
+					// still problems: pinch runners
 					// if inning ends on CS/PO it gets duped
 					
 					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
@@ -246,7 +253,15 @@ function displayEvents() {
 								pitcherID = $(this).nextAll('atbat').first().attr('pitcher');
 							}
 							
+							var pinchRunnerData = /Pinch runner (\w*) (\w*) replaces (\w*) (\w*)/.exec(gameEventText);
+							
 						}
+						
+						// in case gameEventZulu was undefined, just use the previous timestamp plus a small value
+						// this shouldn't happen in MLB's XML files but occasionally does
+						
+						if (gameEventZulu == undefined) { gameEventZulu = new Date(prevGameEventZulu.valueOf() + 1); }
+						prevGameEventZulu = gameEventZulu; 
 						
 						var homeRchanged = false;
 						var awayRchanged = false;
@@ -259,11 +274,8 @@ function displayEvents() {
 							awayR = $(this).attr('away_team_runs'); 
 						}
 						
-						if ($(this) == $(this).parent().children().eq(0)) {
-							outs = 0; onFirstID = ''; onSecondID = ''; onThirdID = '';
-						}
-						
 						var gameEvent = $('<li class="event ' + gameID + '" />');
+						
 						gameEvent.data('zulu', gameEventZulu.valueOf());
 						$('#eventList').append(gameEvent);
 						
@@ -318,14 +330,11 @@ function displayEvents() {
 						
 						if ($(this).is('atbat')) {
 							
-							prevOnFirstID = onFirstID;
-							prevOnSecondID = onSecondID;
-							prevOnThirdID = onThirdID;
 							$(this).children('runner').each(function() {
-								if ($(this).attr('start') == '') { tempID = batterID; }
-								else if ($(this).attr('start') == '1B') { tempID = prevOnFirstID; if (onFirstID == prevOnFirstID) { onFirstID = ''; } }
-								else if ($(this).attr('start') == '2B') { tempID = prevOnSecondID; if (onSecondID == prevOnSecondID) { onSecondID = ''; } }
-								else if ($(this).attr('start') == '3B') { tempID = prevOnThirdID; if (onThirdID == prevOnThirdID) { onThirdID = ''; } }
+								tempID = $(this).attr('id');
+								if ($(this).attr('start') == '1B' && (onFirstID == tempID)) { onFirstID = ''; }
+								else if ($(this).attr('start') == '2B' && (onSecondID == tempID)) { onSecondID = ''; }
+								else if ($(this).attr('start') == '3B' && (onThirdID == tempID)) { onThirdID = ''; }
 								if ($(this).attr('end') == '1B') { onFirstID = tempID; }
 								else if ($(this).attr('end') == '2B') { onSecondID = tempID; }
 								else if ($(this).attr('end') == '3B') { onThirdID = tempID; }
@@ -343,16 +352,14 @@ function displayEvents() {
 								
 								if (atBatEvent.is('runner')) {
 									
-									prevOnFirstID = onFirstID;
-									prevOnSecondID = onSecondID;
-									prevOnThirdID = onThirdID;
-									if (atBatEvent.attr('start') == '') { tempID = batterID; }
-									else if (atBatEvent.attr('start') == '1B') { tempID = prevOnFirstID; if (onFirstID == prevOnFirstID) { onFirstID = ''; } }
-									else if (atBatEvent.attr('start') == '2B') { tempID = prevOnSecondID; if (onSecondID == prevOnSecondID) { onSecondID = ''; } }
-									else if (atBatEvent.attr('start') == '3B') { tempID = prevOnThirdID; if (onThirdID == prevOnThirdID) { onThirdID = ''; } }
+									tempID = atBatEvent.attr('id');
+									if (atBatEvent.attr('start') == '1B' && (onFirstID == tempID)) { onFirstID = ''; }
+									else if (atBatEvent.attr('start') == '2B' && (onSecondID == tempID)) { onSecondID = ''; }
+									else if (atBatEvent.attr('start') == '3B' && (onThirdID == tempID)) { onThirdID = ''; }
 									if (atBatEvent.attr('end') == '1B') { onFirstID = tempID; }
 									else if (atBatEvent.attr('end') == '2B') { onSecondID = tempID; }
 									else if (atBatEvent.attr('end') == '3B') { onThirdID = tempID; }
+									
 								}
 								
 								atBatEvent = atBatEvent.next();
@@ -361,6 +368,7 @@ function displayEvents() {
 							}
 						}
 						
+						if (outs == 3) { onFirstID = ''; onSecondID = ''; onThirdID = ''; }
 					});
 				});
 			
