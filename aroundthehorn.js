@@ -119,7 +119,7 @@ function populateScoreboard() {
 				if (topInning.toLowerCase() == 'y') { gameBoxStatus.text('Top ' + numberToOrdinal(inning)); }
 				else { gameBoxStatus.text('Bot ' + numberToOrdinal(inning)); }
 			}
-			else if (gameStatus == "final" || gameStatus == "game over") {
+			else if (gameStatus == "final" || gameStatus == "game over" || gameStatus == "completed early") {
 				if (inning != 9) { gameBoxStatus.text('Final (' + inning + ')'); }
 				else { gameBoxStatus.text('Final'); }
 			}

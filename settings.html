@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Around the Horn</title>
-		<link rel="stylesheet" href="aroundthehorn.css" type="text/css" />
+		<link rel="stylesheet" href="css/aroundthehorn.css" type="text/css" />
 	</head>
 	<body>
 		
@@ -17,9 +17,96 @@
 		
 		<h2>Settings</h2>
 		
-		<p>
-			Dummy page
-		</p>
+		<div style="margin: 2em;">
+			
+			<h3>Default teams</h3>
+		
+			<p>
+				By default, select games involving these teams: 
+			</p>
+		
+			<div style="display: table; border: solid thin; font-size: 85%; padding: 0.5em;">
+				<div style="display: table-row;">
+					<div style="display: table-cell; padding: 1em; width: 6em;">
+						<div style="font-weight: bold; margin: 0 0 1em 0;">AL East</div>
+						<ul style="list-style-type: none; margin: 0; padding: 0;">
+							<li><input type="checkbox" value="ATL" /> BAL</li>
+							<li><input type="checkbox" value="ATL" /> BOS</li>
+							<li><input type="checkbox" value="ATL" /> NYY</li>
+							<li><input type="checkbox" value="ATL" /> TB</li>
+							<li><input type="checkbox" value="ATL" /> TOR</li>
+						</ul>
+					</div>
+					<div style="display: table-cell; padding: 1em; width: 6em;">
+						<div style="font-weight: bold; margin: 0 0 1em 0;">AL Central</div>
+						<ul style="list-style-type: none; margin: 0; padding: 0;">
+							<li><input type="checkbox" value="ATL" /> CWS</li>
+							<li><input type="checkbox" value="ATL" /> CLE</li>
+							<li><input type="checkbox" value="ATL" /> DET</li>
+							<li><input type="checkbox" value="ATL" /> KC</li>
+							<li><input type="checkbox" value="ATL" /> MIN</li>
+						</ul>
+					</div>
+					<div style="display: table-cell; padding: 1em; width: 6em;">
+						<div style="font-weight: bold; margin: 0 0 1em 0;">AL West</div>
+						<ul style="list-style-type: none; margin: 0; padding: 0;">
+							<li><input type="checkbox" value="ATL" /> LAA</li>
+							<li><input type="checkbox" value="ATL" /> OAK</li>
+							<li><input type="checkbox" value="ATL" /> SEA</li>
+							<li><input type="checkbox" value="ATL" /> TEX</li>
+						</ul>
+					</div>
+					<div style="display: table-cell; padding: 1em; width: 6em;">
+						<div style="font-weight: bold; margin: 0 0 1em 0;">NL East</div>
+						<ul style="list-style-type: none; margin: 0; padding: 0;">
+							<li><input type="checkbox" value="ATL" /> ATL</li>
+							<li><input type="checkbox" value="ATL" /> MIA</li>
+							<li><input type="checkbox" value="ATL" /> NYM</li>
+							<li><input type="checkbox" value="ATL" /> PHI</li>
+							<li><input type="checkbox" value="ATL" /> WSH</li>
+						</ul>
+					</div>
+					<div style="display: table-cell; padding: 1em; width: 6em;">
+						<div style="font-weight: bold; margin: 0 0 1em 0;">NL Central</div>
+						<ul style="list-style-type: none; margin: 0; padding: 0;">
+							<li><input type="checkbox" value="ATL" /> CHC</li>
+							<li><input type="checkbox" value="ATL" /> CIN</li>
+							<li><input type="checkbox" value="ATL" /> HOU</li>
+							<li><input type="checkbox" value="ATL" /> MIL</li>
+							<li><input type="checkbox" value="ATL" /> PIT</li>
+							<li><input type="checkbox" value="ATL" /> STL</li>
+						</ul>
+					</div>
+					<div style="display: table-cell; padding: 1em; width: 6em;">
+						<div style="font-weight: bold; margin: 0 0 1em 0;">NL West</div>
+						<ul style="list-style-type: none; margin: 0; padding: 0;">
+							<li><input type="checkbox" value="ATL" /> ARI</li>
+							<li><input type="checkbox" value="ATL" /> COL</li>
+							<li><input type="checkbox" value="ATL" /> LAD</li>
+							<li><input type="checkbox" value="ATL" /> SD</li>
+							<li><input type="checkbox" value="ATL" /> SF</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		
+		</div>
+		
+		<div style="margin: 2em;">
+		
+			<h3>Date rollover</h3>
+		
+			<p>
+				By default, when you load the event feed page, the as-of date is set to today, local time. But if you are following games past midnight, which may be a very common occurrence depending on where you live, you probably do not want the default as-of date to roll for a few more hours. Set an offset below to delay that roll: 
+			</p>
+		
+			<p style="margin-left: 2em;">
+				Roll the date <input type="text" size="3" /> hours after midnight
+			</p>
+		
+		</div>
+		
+		<input type="button" value="Save" />
 		
 	</body>
 </html>
