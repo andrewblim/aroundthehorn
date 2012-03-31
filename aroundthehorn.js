@@ -304,58 +304,61 @@ function displayEvents() {
 						// main section: construct the DOM elements that create the event feed
 						
 						var gameEvent = $('<li class="event ' + gameID + '" />');
-						
 						gameEvent.data('zulu', gameEventZulu.valueOf());
+						
+						gameEvent.append($(
+										'<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>' + 
+										
+										'<div class="eventScoreboard">' + 
+										'<div class="eventScoreboardInning">' +
+										inningHalf + ' ' + numberToOrdinal(inning) + ', <span class="eventScoreboardOuts">' + outs + ' out</span>' + 
+										'</div>' + 
+										'<div class="eventScoreboardWrap">' +
+										'<div class="eventScoreboardAway">' + 
+										'<div class="eventScoreboardTeam">' + awayTeam + '</div>' +
+										'<div class="eventScoreboardScore' + (awayRchanged ? ' scoreChanged' : '') + '">' + awayR + '</div>' +
+										'</div>' +
+										'<div class="eventScoreboardHome">' + 
+										'<div class="eventScoreboardTeam">' + homeTeam + '</div>' +
+										'<div class="eventScoreboardScore' + (homeRchanged ? ' scoreChanged' : '') + '">' + homeR + '</div>' +
+										'</div>' +
+										'</div>' +
+										'</div>' +
+										
+										'<div class="eventAtBat">' +
+										'<div class="eventAtBatWrap">' +
+										'<div class="eventAtBatPosition">' +
+										'<div class="eventAtBatLabel">P:</div>' + 
+										'<div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div>' +
+										'</div>' +
+										'<div class="eventAtBatPosition">' +
+										'<div class="eventAtBatLabel">AB:</div>' +
+										'<div class="eventAtBatPlayer">' + players[batterID].shortName + '</div>' + 
+										'</div>' +
+										'</div>' +
+										'</div>' +
+										
+										'<div class="eventAtBat">' +
+										'<div class="eventAtBatWrap ' + (outs == 3 ? ' eventAtBatThirdOut' : '') + '">' +
+										'<div class="eventAtBatPosition">' + 
+										'<div class="eventAtBatLabel">1st:</div>' +
+										'<div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div>' +
+										'</div>' +
+										'<div class="eventAtBatPosition">' + 
+										'<div class="eventAtBatLabel">2nd:</div>' +
+										'<div class="eventAtBatPlayer">' + (onSecondID == '' ? '' : players[onSecondID].shortName) + '</div>' +
+										'</div>' +
+										'<div class="eventAtBatPosition">' +
+										'<div class="eventAtBatLabel">3rd:</div>' +
+										'<div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div>' +
+										'</div>' +
+										'</div>' +
+										'</div>' +
+										
+										'<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'
+										));
+						
 						$('#eventList').append(gameEvent);
-						
-						gameEvent.append($('<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>'));
-						
-						var gameEventScoreboard = $('<div class="eventScoreboard" />');
-						gameEvent.append(gameEventScoreboard);
-						
-						var inningDescription = inningHalf + ' ' + numberToOrdinal(inning) + ', <span class="eventScoreboardOuts">' + outs + ' out</span>';
-						gameEventScoreboard.append('<div class="eventScoreboardInning">' + inningDescription + '</div>');
-						
-						var gameEventScoreboardWrap = $('<div class="eventScoreboardWrap" />');
-						gameEventScoreboard.append(gameEventScoreboardWrap);
-						
-						var gameEventScoreboardAway = $('<div class="eventScoreboardAway" />');
-						gameEventScoreboard.append(gameEventScoreboardAway);
-						gameEventScoreboardAway.append($('<div class="eventScoreboardTeam">' + awayTeam + '</div>'));
-						gameEventScoreboardAway.append($('<div class="eventScoreboardScore' + (awayRchanged ? ' scoreChanged' : '') + '">' + awayR + '</div>'));
-						var gameEventScoreboardHome = $('<div class="eventScoreboardHome" />');
-						gameEventScoreboard.append(gameEventScoreboardHome);
-						gameEventScoreboardHome.append($('<div class="eventScoreboardTeam">' + homeTeam + '</div>'));
-						gameEventScoreboardHome.append($('<div class="eventScoreboardScore' + (homeRchanged ? ' scoreChanged' : '') + '">' + homeR + '</div>'));
-						
-						var gameEventAtBat, gameEventAtBatWrap, gameEventAtBatPosition;
-						
-						gameEventAtBat = $('<div class="eventAtBat" />');
-						gameEvent.append(gameEventAtBat);
-						gameEventAtBatWrap = $('<div class="eventAtBatWrap" />');
-						gameEventAtBat.append(gameEventAtBatWrap);
-						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">P:</div>'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + players[pitcherID].shortName + '</div>'));
-						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">AB:</div>'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + players[batterID].shortName + '</div>'));
-						
-						gameEventAtBat = $('<div class="eventAtBat" />');
-						gameEvent.append(gameEventAtBat);
-						gameEventAtBatWrap = $('<div class="eventAtBatWrap ' + (outs == 3 ? ' eventAtBatThirdOut' : '') + '" />');
-						gameEventAtBat.append(gameEventAtBatWrap);
-						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">1st:</div>'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div>'));
-						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">2nd:</div>'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + (onSecondID == '' ? '' : players[onSecondID].shortName) + '</div>'));
-						gameEventAtBatPosition = gameEventAtBatWrap.append($('<div class="eventAtBatPosition" />'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatLabel">3rd:</div>'));
-						gameEventAtBatPosition.append($('<div class="eventAtBatPlayer">' + (onThirdID == '' ? '' : players[onThirdID].shortName) + '</div>'));
-					
-						gameEvent.append($('<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'));
 						
 						// update runner data
 						
@@ -429,13 +432,17 @@ $(document).ready(function() {
 	var asOfDate = new Date();
 	var scoreboardData;
 	
+	var timer;
+	
 	$('#loadStatus').ajaxStart(function() {
+		// timer = (new Date()).valueOf();
 		$(this).text('Loading...');
 		$('#progressBar').progressbar({ value: 0 });
 	});
 	$('#loadStatus').ajaxStop(function() {
 		$(this).text('Ready');
 		$('#progressBar').progressbar({ value: 100 });
+		// alert(((new Date()).valueOf() - timer)/1000);
 	});
 
 	$('#asOfDate').datepicker({
