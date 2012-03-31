@@ -1,12 +1,11 @@
 
 - a pitching change to open an inning will temporarily have the wrong pitcher/atbat info
 
-Thu:
 - fix the date rollover issue
 - populate settings and help pages
 - add a "Loading" message/progress bar
-
-Fri: 
+- speed up loading? maybe moot the progress bar
+ 
 - add a player filter
 - make it update live
 - add some error checks

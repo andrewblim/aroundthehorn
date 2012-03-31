@@ -171,6 +171,10 @@ function populateScoreboard() {
 
 function displayEvents() {
 	
+	var gamesLoaded = 0;
+	var gamesTotal = $('#gameList').children().length;
+	$('#loadStatus').text('Loading...');
+	
 	$('#gameList').children().each(function() {
 		
 		// uncomment to debug on single games
@@ -238,6 +242,8 @@ function displayEvents() {
 						if ($(this).attr('o') != undefined) { outs = $(this).attr('o'); }
 						if ($(this).attr('des') != undefined) { gameEventText = $(this).attr('des'); }
 						
+						// <atbat> and <action> tags handled differently
+						
 						if ($(this).is('atbat')) {
 							
 							var pitches = $(this).children('pitch');
@@ -295,6 +301,8 @@ function displayEvents() {
 							awayR = $(this).attr('away_team_runs'); 
 						}
 						
+						// main section: construct the DOM elements that create the event feed
+						
 						var gameEvent = $('<li class="event ' + gameID + '" />');
 						
 						gameEvent.data('zulu', gameEventZulu.valueOf());
@@ -349,6 +357,8 @@ function displayEvents() {
 					
 						gameEvent.append($('<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'));
 						
+						// update runner data
+						
 						if ($(this).is('atbat')) {
 							
 							$(this).children('runner').each(function() {
@@ -389,22 +399,25 @@ function displayEvents() {
 								
 								atBatEvent = atBatEvent.next();
 							}
-							$('#loadStatus').text($('#loadStatus').text() + 'X ');
+							
 						}
 						
 						prevGameEventZulu = gameEventZulu; 
 						
 					});
 					
-					// $('#loadStatus').text($('#loadStatus').text() + homeTeam + ' @ ' + awayTeam + ' ');
 				});
 				
 				$('#eventList > li.event').tsort({ 
 					sortFunction: function(a,b) { return b.e.data('zulu') - a.e.data('zulu'); } 
 				});
 				
+				gamesLoaded++;
+				$('#loadStatus').text('Loaded ' + gamesLoaded + ' out of ' + gamesTotal + ' games...');
+				$('#progressBar').progressbar({ value: (gamesLoaded / gamesTotal) * 100 });
 			});
 		});
+	
 	});
 
 }
@@ -415,6 +428,15 @@ $(document).ready(function() {
 	
 	var asOfDate = new Date();
 	var scoreboardData;
+	
+	$('#loadStatus').ajaxStart(function() {
+		$(this).text('Loading...');
+		$('#progressBar').progressbar({ value: 0 });
+	});
+	$('#loadStatus').ajaxStop(function() {
+		$(this).text('Ready');
+		$('#progressBar').progressbar({ value: 100 });
+	});
 
 	$('#asOfDate').datepicker({
 		dateFormat: 'D d M yy',
@@ -443,6 +465,6 @@ $(document).ready(function() {
 		});
 	});
 	
-	$('#progressBar').progressbar({ value: 50 });
+	$('#progressBar').progressbar({ value: 100 });
 	
 });
