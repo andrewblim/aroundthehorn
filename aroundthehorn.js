@@ -119,7 +119,7 @@ function populateScoreboard() {
 				if (topInning.toLowerCase() == 'y') { gameBoxStatus.text('Top ' + numberToOrdinal(inning)); }
 				else { gameBoxStatus.text('Bot ' + numberToOrdinal(inning)); }
 			}
-			else if (gameStatus == "final") {
+			else if (gameStatus == "final" || gameStatus == "game over") {
 				if (inning != 9) { gameBoxStatus.text('Final (' + inning + ')'); }
 				else { gameBoxStatus.text('Final'); }
 			}
@@ -173,12 +173,15 @@ function displayEvents() {
 	
 	$('#gameList').children().each(function() {
 		
+		// uncomment to debug on single games
+		// if ($(this).data('gameday') != "2012_03_29_minmlb_pitmlb_1") { return; }
+		
 		var gameURL = gamedayURL + 
 					  "/year_" + asOfDate.getFullYear() +
 					  "/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
 					  "/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
 					  "/gid_" + $(this).data('gameday');
-						
+				
 		var inningURL = gameURL + "/inning/inning_all.xml"; 
 		var playersURL = gameURL + "/players.xml";
 		
@@ -207,8 +210,7 @@ function displayEvents() {
 				
 				$(inningData).children('game').each(function() {
 				
-					var gameEventText, gameEventZulu, prevGameEventZulu;
-					var runnerIndex;
+					var prevGameEventZulu;
 					
 					var homeR = 0, awayR = 0, outs = 0;
 					var batterID = '', pitcherID = '', onFirstID = '', onSecondID = '', onThirdID = '';
@@ -221,7 +223,14 @@ function displayEvents() {
 					
 					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
 						
+						var eventType = $(this).attr('event').toLowerCase();
+						if (eventType == 'game advisory' || eventType == 'defensive sub' || eventType == 'defensive switch') {
+							return;
+						}
+						
 						var inning, inningHalf;
+						var gameEventText, gameEventZulu;
+						
 						inning = $(this).parent().parent().attr('num');
 						if ($(this).parent().is('top')) { inningHalf = 'Top'; }
 						else if ($(this).parent().is('bottom')) { inningHalf = 'Bot'; }
@@ -230,8 +239,6 @@ function displayEvents() {
 						if ($(this).attr('des') != undefined) { gameEventText = $(this).attr('des'); }
 						
 						if ($(this).is('atbat')) {
-							
-							runnerIndex = 0;
 							
 							var pitches = $(this).children('pitch');
 							if (pitches.length > 0) { gameEventZulu = zuluTimestampToDate(pitches.last().attr('tfs_zulu')); }
@@ -253,7 +260,22 @@ function displayEvents() {
 								pitcherID = $(this).nextAll('atbat').first().attr('pitcher');
 							}
 							
-							var pinchRunnerData = /Pinch runner (\w*) (\w*) replaces (\w*) (\w*)/.exec(gameEventText);
+							// Pinch runners are a problem... I don't see anywhere in the XML file where it is 
+							// explicitly stated who is replacing whom (surprised it's not done with <runner>
+							// tags). So I'm backing it out of the description, not ideal, I know. 
+							
+							var pinchRunnerData = /Pinch runner (\S+) (\S+) replaces (\S+) (\S+)\./.exec(gameEventText);
+							if (pinchRunnerData != null) {
+								if (onFirstID != '' && players[onFirstID].first == pinchRunnerData[3] && players[onFirstID].last == pinchRunnerData[4]) {
+									onFirstID = $(this).attr('player');
+								}
+								else if (onSecondID != '' && players[onSecondID].first == pinchRunnerData[3] && players[onSecondID].last == pinchRunnerData[4]) {
+									onFirstID = $(this).attr('player');
+								}
+								else if (onThirdID != '' && players[onThirdID].first == pinchRunnerData[3] && players[onThirdID].last == pinchRunnerData[4]) {
+									onFirstID = $(this).attr('player');
+								}
+							}
 							
 						}
 						
@@ -261,7 +283,6 @@ function displayEvents() {
 						// this shouldn't happen in MLB's XML files but occasionally does
 						
 						if (gameEventZulu == undefined) { gameEventZulu = new Date(prevGameEventZulu.valueOf() + 1); }
-						prevGameEventZulu = gameEventZulu; 
 						
 						var homeRchanged = false;
 						var awayRchanged = false;
@@ -343,12 +364,16 @@ function displayEvents() {
 						}
 						else {  // .is('action')
 							
-							var atBatEvent = $(this).next('atbat').children().eq(runnerIndex);
+							var atBatEvent = $(this).nextAll('atbat').children().eq(0);
 							var atBatEventZulu;
+							
 							while (atBatEvent.length > 0) {
 								
 								atBatEventZulu = zuluTimestampToDate(atBatEvent.attr('tfs_zulu'));
-								if (atBatEventZulu != undefined && atBatEventZulu > gameEventZulu) { break; }
+								if (atBatEventZulu != undefined) {
+									if (atBatEventZulu <= prevGameEventZulu) { atBatEvent = atBatEvent.next(); continue; }
+									if (atBatEventZulu > gameEventZulu) { break; }
+								}
 								
 								if (atBatEvent.is('runner')) {
 									
@@ -363,12 +388,11 @@ function displayEvents() {
 								}
 								
 								atBatEvent = atBatEvent.next();
-								runnerIndex++;
-								
 							}
 						}
 						
-						if (outs == 3) { onFirstID = ''; onSecondID = ''; onThirdID = ''; }
+						prevGameEventZulu = gameEventZulu; 
+						
 					});
 				});
 			
