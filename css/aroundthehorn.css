@@ -71,6 +71,7 @@ li.menuItem {
 #gameList {
 	margin: 0;
 	padding: 0;
+	width: 100%;
 }
 
 li.gameBox {
@@ -97,6 +98,17 @@ li.gameBox:hover { background-color: #FFFFD0; }
 .gameBoxData { margin: 0.25em; }
 .gameBoxScoreline { display: block; }
 .gameBoxStatus { display: block; }
+
+#loadStatus {
+	margin: 0 0 1em 0;
+	font-size: 85%;
+}
+
+#progressBar {
+	width: 100%;
+	height: 10px;
+	margin: 0.25em 0 1em 0;
+}
 
 #eventList {
 	margin: 0;

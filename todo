@@ -16,4 +16,7 @@ Sat:
 - use only jqueryui necessary
 
 Known bugs:
+
 - If two actions occur without any timed event (such as a pitch) occurring in between them, it currently does not advance runners properly. Example: 2012_03_29_minmlb_pitmlb_1 in the top of the 1st, Ben Revere steals third, then Danny Valencia is caught stealing second. But because there is no timed event between Revere's steal and Valencia's CS (it goes <runner> for Revere, <po> attempt, and then <runner> for Valencia), it currently applies both runner events to Revere's steal, basically thinking it was a double steal attempt. 
+
+Tinysort: http://tinysort.sjeiti.com/

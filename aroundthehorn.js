@@ -175,6 +175,7 @@ function displayEvents() {
 		
 		// uncomment to debug on single games
 		// if ($(this).data('gameday') != "2012_03_29_minmlb_pitmlb_1") { return; }
+		// if ($(this).data('homeTeam') != 'BOS' && $(this).data('awayTeam') != 'BOS') { return; }
 		
 		var gameURL = gamedayURL + 
 					  "/year_" + asOfDate.getFullYear() +
@@ -209,7 +210,7 @@ function displayEvents() {
 				// men on base. 
 				
 				$(inningData).children('game').each(function() {
-				
+					
 					var prevGameEventZulu;
 					
 					var homeR = 0, awayR = 0, outs = 0;
@@ -218,10 +219,9 @@ function displayEvents() {
 					
 					prevGameEventZulu = new Date(asOfDate);
 					
-					// still problems: pinch runners
-					// if inning ends on CS/PO it gets duped
+					// still problems: if inning ends on CS/PO it gets duped
 					
-					$(this).find('atbat,action[event!="Game Advisory"]').each(function() {
+					$(this).find('atbat,action').each(function() {
 						
 						var eventType = $(this).attr('event').toLowerCase();
 						if (eventType == 'game advisory' || eventType == 'defensive sub' || eventType == 'defensive switch') {
@@ -389,13 +389,16 @@ function displayEvents() {
 								
 								atBatEvent = atBatEvent.next();
 							}
+							$('#loadStatus').text($('#loadStatus').text() + 'X ');
 						}
 						
 						prevGameEventZulu = gameEventZulu; 
 						
 					});
+					
+					// $('#loadStatus').text($('#loadStatus').text() + homeTeam + ' @ ' + awayTeam + ' ');
 				});
-			
+				
 				$('#eventList > li.event').tsort({ 
 					sortFunction: function(a,b) { return b.e.data('zulu') - a.e.data('zulu'); } 
 				});
@@ -403,6 +406,7 @@ function displayEvents() {
 			});
 		});
 	});
+
 }
 
 // "main" /////////////////////////////////////////////////////////////////////
@@ -438,5 +442,7 @@ $(document).ready(function() {
 			} 
 		});
 	});
+	
+	$('#progressBar').progressbar({ value: 50 });
 	
 });
