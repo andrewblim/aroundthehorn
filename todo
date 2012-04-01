@@ -1,9 +1,11 @@
 
 - fix the date rollover issue
-- populate settings and help pages
+- populate settings
+- add quick-click single-game focus
 - add a player filter
 - make it update live
 - add icons
+- populate help page
 - use only jqueryui necessary
 
 Known bugs:

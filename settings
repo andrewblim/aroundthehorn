@@ -1,0 +1,9 @@
+
+# Controls which teams are selected by default
+
+teams=BAL,BOS,NYY,TB,TOR,CWS,CLE,DET,KC,MIN,LAA,OAK,SEA,TEX,ATL,MIA,NYM,PHI,WSH,CHC,CIN,HOU,MIL,PIT,STL,ARI,COL,LAD,SD,SF
+otherTeams=false
+
+# Controls how long after midnight to roll over to tomorrow (in ms)
+
+rollover=14400000

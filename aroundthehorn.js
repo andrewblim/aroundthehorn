@@ -173,7 +173,6 @@ function displayEvents() {
 	
 	var gamesLoaded = 0;
 	var gamesTotal = $('#gameList').children().length;
-	$('#loadStatus').text('Loading...');
 	
 	$('#gameList').children().each(function() {
 		
@@ -436,12 +435,12 @@ $(document).ready(function() {
 	
 	$('#loadStatus').ajaxStart(function() {
 		// timer = (new Date()).valueOf();
-		$(this).text('Loading...');
 		$('#progressBar').progressbar({ value: 0 });
+		$(this).text('Loading...');
 	});
 	$('#loadStatus').ajaxStop(function() {
-		$(this).text('Ready');
 		$('#progressBar').progressbar({ value: 100 });
+		$(this).text('Ready');
 		// alert(((new Date()).valueOf() - timer)/1000);
 	});
 
