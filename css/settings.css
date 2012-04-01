@@ -1,5 +1,5 @@
 
-#settings { margin: 2em; }
+.settings { margin: 2em; width: 85%; text-align: justify; }
 
 #teamSelectBox {
 	display: table;
@@ -25,3 +25,5 @@
 	margin: 0;
 	padding: 0;
 }
+
+#dateRollOffset { text-align: right; }

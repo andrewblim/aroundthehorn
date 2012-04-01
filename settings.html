@@ -4,6 +4,8 @@
 		<title>Around the Horn</title>
 		<link rel="stylesheet" href="css/aroundthehorn.css" type="text/css" />
 		<link rel="stylesheet" href="css/settings.css" type="text/css" />
+		<script src="js/jquery-1.7.1.min.js"></script>
+		<script src="js/settings.js"></script>
 	</head>
 	<body>
 		
@@ -18,7 +20,7 @@
 		
 		<h2>Settings</h2>
 		
-		<div id="settings">
+		<div class="settings">
 			
 			<h3>Default teams</h3>
 		
@@ -28,88 +30,28 @@
 		
 			<div id="teamSelectBox">
 				<div id="teamSelectBoxRow">
-					<div class="teamSelectBoxDivision">
-						<div class="teamSelectBoxDivisionName">AL East</div>
-						<ul class="teamSelectBoxDivisionList">
-							<li><input id="BAL" type="checkbox" /> BAL</li>
-							<li><input id="BOS" type="checkbox" /> BOS</li>
-							<li><input id="NYY" type="checkbox" /> NYY</li>
-							<li><input id="TB" type="checkbox" /> TB</li>
-							<li><input id="TOR" type="checkbox" /> TOR</li>
-						</ul>
-					</div>
-					<div class="teamSelectBoxDivision">
-						<div class="teamSelectBoxDivisionName">AL Central</div>
-						<ul class="teamSelectBoxDivisionList">
-							<li><input id="CWS" type="checkbox" /> CWS</li>
-							<li><input id="CLE" type="checkbox" /> CLE</li>
-							<li><input id="DET" type="checkbox" /> DET</li>
-							<li><input id="KC" type="checkbox" /> KC</li>
-							<li><input id="MIN" type="checkbox" /> MIN</li>
-						</ul>
-					</div>
-					<div class="teamSelectBoxDivision">
-						<div class="teamSelectBoxDivisionName">AL West</div>
-						<ul class="teamSelectBoxDivisionList">
-							<li><input id="LAA" type="checkbox" /> LAA</li>
-							<li><input id="OAK" type="checkbox" /> OAK</li>
-							<li><input id="SEA" type="checkbox" /> SEA</li>
-							<li><input id="TEX" type="checkbox" /> TEX</li>
-						</ul>
-					</div>
-					<div class="teamSelectBoxDivision">
-						<div class="teamSelectBoxDivisionName">NL East</div>
-						<ul class="teamSelectBoxDivisionList">
-							<li><input id="ATL" type="checkbox" /> ATL</li>
-							<li><input id="MIA" type="checkbox" /> MIA</li>
-							<li><input id="NYM" type="checkbox" /> NYM</li>
-							<li><input id="PHI" type="checkbox" /> PHI</li>
-							<li><input id="WSH" type="checkbox" /> WSH</li>
-						</ul>
-					</div>
-					<div class="teamSelectBoxDivision">
-						<div class="teamSelectBoxDivisionName">NL Central</div>
-						<ul class="teamSelectBoxDivisionList">
-							<li><input id="CHC" type="checkbox" /> CHC</li>
-							<li><input id="CIN" type="checkbox" /> CIN</li>
-							<li><input id="HOU" type="checkbox" /> HOU</li>
-							<li><input id="MIL" type="checkbox" /> MIL</li>
-							<li><input id="PIT" type="checkbox" /> PIT</li>
-							<li><input id="STL" type="checkbox" /> STL</li>
-						</ul>
-					</div>
-					<div class="teamSelectBoxDivision">
-						<div class="teamSelectBoxDivisionName">NL West</div>
-						<ul class="teamSelectBoxDivisionList">
-							<li><input id="ARI" type="checkbox" /> ARI</li>
-							<li><input id="COL" type="checkbox" /> COL</li>
-							<li><input id="LAD" type="checkbox" /> LAD</li>
-							<li><input id="SD" type="checkbox" /> SD</li>
-							<li><input id="SF" type="checkbox" /> SF</li>
-						</ul>
-					</div>
 				</div>
 			</div>
-			<input type="checkbox" />
+			<input id="otherTeams" type="checkbox" />
 			<span style="font-size: 85%;">Include any teams not in the above list (these are sometimes found in exhibition games)</span>
 		
 		</div>
 		
-		<div style="margin: 2em;">
+		<div class="settings">
 		
 			<h3>Date rollover</h3>
 		
 			<p>
-				By default, when you load the event feed page, the as-of date is set to today. But if you are following games that go on past midnight, local time, you probably do not want the default as-of date to roll for a few more hours. Set an offset below to delay that roll; I suggest 4 for people in Eastern Time and a correspondingly higher or lower number for other time zones. 
+				By default, when you load the event feed page, the as-of date is set to today. But if you are following games that go on past midnight, local time, you probably do not want the default as-of date to roll for a few more hours. Set an offset below to delay that roll; 4 hours for people in Eastern Time and a correspondingly offset number for other time zones should work. 
 			</p>
 		
 			<div style="margin-left: 2em;">
-				Roll the date <input type="text" size="3" /> hours after midnight
+				Roll the date <input id="dateRollOffset" type="text" size="3" /> hours after midnight
 			</div>
 		
 		</div>
 		
-		<input type="button" value="Save" />
+		<input id="saveSettings" type="button" value="Save settings" />
 		
 	</body>
 </html>
