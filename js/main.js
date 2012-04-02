@@ -103,13 +103,14 @@ function populateScoreboard() {
 			var inning = $(this).attr('inning');
 			var topInning = $(this).attr('top_inning');
 			
+			gameBox.data('complete', false);
 			if (gameStatus == "in progress") {
 				if (topInning.toLowerCase() == 'y') { gameBoxStatus.text('Top ' + numberToOrdinal(inning)); }
 				else { gameBoxStatus.text('Bot ' + numberToOrdinal(inning)); }
 			}
 			else if (gameStatus == "final" || gameStatus == "game over" || gameStatus == "completed early") {
 				if (inning != 9) { gameBoxStatus.text('Final (' + inning + ')'); }
-				else { gameBoxStatus.text('Final'); }
+				else { gameBoxStatus.text('Final'); gameBox.data('complete', true); }
 			}
 			else if (gameStatus == "preview") {
 				gameBoxStatus.text($(this).attr('time') + ' ' + $(this).attr('ampm') + ' ' + $(this).attr('time_zone'));
@@ -173,6 +174,8 @@ function displayEvents() {
 			isVisible = true;
 		}
 		else { isVisible = false; }
+		
+		var isComplete = $(this).data('complete');
 		
 		var gameURL = gamedayURL + 
 					  "/year_" + asOfDate.getFullYear() +
@@ -408,6 +411,10 @@ function displayEvents() {
 				$('#eventList > li.event').tsort({ 
 					sortFunction: function(a,b) { return b.e.data('zulu') - a.e.data('zulu'); } 
 				});
+				
+				if (isComplete) {
+					$('#eventList > li.event[class~=' + gameID + ']:first > div.eventScoreboard').addClass('eventScoreboardComplete');
+				}
 				
 				gamesLoaded++;
 				$('#loadStatus').text('Loaded ' + gamesLoaded + ' out of ' + gamesTotal + ' games...');

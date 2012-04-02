@@ -91,12 +91,14 @@ li.event:hover {
 
 .eventScoreboard {
 	display: table-cell;
-	margin: 0;
-	padding: 0.5em 1.5em 0.5em 0.5em;
-	width: 6em;
+	margin: 0 1em 0 0;
+	padding: 0.5em 0.5em 0.5em 0.5em;
+	width: 5.25em;
 	font-weight: bold;
 	vertical-align: middle;
 }
+
+.eventScoreboardComplete { border: solid 1px; box-shadow: 0px 0px 3px gray; }
 
 .eventScoreboardInning { display: block; font-size: 75%; width: 100%; }
 .eventScoreboardOuts { display: inline; }
