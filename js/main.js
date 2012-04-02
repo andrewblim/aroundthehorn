@@ -24,12 +24,8 @@ function zuluTimeToTimestamp(zuluTime) {
 	}
 	catch (err) { return undefined; }
 	
-	if (zuluTimeLocal.getDate() < asOfDate.getDate()) { 
-		retString = '(' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) ';
-	}
-	else if (zuluTimeLocal.getDate() > asOfDate.getDate()) { 
-		retString += '(+' + (zuluTimeLocal.getDate() - asOfDate.getDate()) + 'd) ';
-	}
+	if (zuluTimeLocal.valueOf() < asOfDate.valueOf()) { retString = '(-1d) '; }
+	else if (zuluTimeLocal.valueOf() > asOfDate.valueOf()) { retString += '(+1d) '; }
 	
 	var hours = ((zuluTimeLocal.getHours() + 11) % 12) + 1;
 	
@@ -314,6 +310,8 @@ function displayEvents() {
 						if (isVisible == false) { gameEvent.css('display', 'none'); }
 						
 						gameEvent.append($(
+										'<div class="eventIcon">' + 
+										'</div>' + 
 										'<div class="eventTimestamp">' + zuluTimeToTimestamp(gameEventZulu) + '</div>' + 
 										
 										'<div class="eventScoreboard">' + 
@@ -365,6 +363,24 @@ function displayEvents() {
 										'<div class="eventDescription' + (awayRchanged || homeRchanged ? ' scoringPlay' : '') + '">' + gameEventText + '</div>'
 										));
 						
+						gameEvent.hover(
+							function() {	
+								$(this).children('.eventIcon').append($(
+									'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20">' +
+									'<defs>' +
+									'<radialGradient id="focusButtonBG" cx="50%" cy="50%" r="50%">' + 
+									'<stop offset="0%" stop-color="silver" />' +
+									'<stop offset="100%" stop-color="gray" />' +
+									'</radialGradient>' +
+									'</defs>' +
+									"<circle fill=\"url('#focusButtonBG')\" stroke-width=\"0\" cx=\"10\" cy=\"10\" r=\"10\" />'" +
+									'<polygon fill="white" stroke-width="0" points="7,6 14,10 7,14 9,10" />' +
+									'</svg>'
+									))},
+							function() {
+								$(this).children('.eventIcon').empty();
+							}
+						);
 						$('#eventList').append(gameEvent);
 						
 						// update runner data
