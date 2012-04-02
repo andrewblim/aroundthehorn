@@ -1,25 +1,8 @@
 
-// globals ////////////////////////////////////////////////////////////////////
-
-var gamedayURL = "http://gd2.mlb.com/components/game/mlb";
-
-// helper functions ///////////////////////////////////////////////////////////
-
 function setAsOfDate(date) {
 	var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 	$("#asOfDate").attr("value", dayNames[date.getDay()] + ' ' + date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear());
-}
-
-function numberToOrdinal(n) {
-	if ((n % 10) == 1 && (n % 100) != 11) { return n + 'st'; }
-	else if ((n % 10) == 2 && (n % 100) != 12) { return n + 'nd'; }
-	else if ((n % 10) == 3 && (n % 100) != 13) { return n + 'rd'; }
-	else { return n + 'th'; }
-}
-
-function padNumber(number, pad, places) {
-	return Array(Math.max(places - number.toString().length, 0) + 1).join(pad) + number;
 }
 
 function zuluTimestampToDate(zuluTime) {
@@ -59,8 +42,6 @@ function zuluTimeToString(zuluTime) {
 	
 	return retString;
 }
-
-// functions //////////////////////////////////////////////////////////////////
 
 function populateScoreboard() {
 	
@@ -433,6 +414,8 @@ function displayEvents() {
 // "main" /////////////////////////////////////////////////////////////////////
 
 $(document).ready(function() {
+	
+	setDefaultsIfUndefined();
 	
 	var asOfDate = new Date(Date.now() - Number(localStorage['aroundthehorn_dateRollOffset']));
 	var scoreboardData;

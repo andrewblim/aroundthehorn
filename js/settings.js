@@ -1,28 +1,4 @@
 
-var teams = {
-	'AL East': ['BAL', 'BOS', 'NYY', 'TB', 'TOR'],
-	'AL Central': ['CLE', 'CWS', 'DET', 'KC', 'MIN'],
-	'AL West': ['LAA', 'OAK', 'SEA', 'TEX'],
-	'NL East': ['ATL', 'MIA', 'NYM', 'PHI', 'WSH'],
-	'NL Central': ['CHC', 'CIN', 'HOU', 'MIL', 'PIT', 'STL'],
-	'NL West': ['ARI', 'COL', 'LAD', 'SD', 'SF']
-};
-
-function setDefaultsIfUndefined() {
-	
-	for (var division in teams) {
-		for (var i = 0; i < teams[division].length; i++) {
-			if (localStorage['aroundthehorn_' + teams[division][i]] == undefined) {
-				localStorage['aroundthehorn_' + teams[division][i]] = true;
-			}
-		}
-	}
-	
-	if (localStorage['aroundthehorn_dateRollOffset'] == undefined) { localStorage['aroundthehorn_dateRollOffset'] = 0; }
-	if (localStorage['aroundthehorn_otherTeams'] == undefined) { localStorage['aroundthehorn_otherTeams'] = true; }
-	
-}
-
 function createTeamCheckboxes() {
 	
 	var appendString;
