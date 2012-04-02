@@ -311,7 +311,9 @@ function displayEvents() {
 						if (isVisible == false) { gameEvent.css('display', 'none'); }
 						
 						gameEvent.append($(
-										'<div class="eventIcon">' + 
+										'<div class="eventIcon eventUnfocus">' + 
+										'</div>' +
+										'<div class="eventIcon eventFocus">' + 
 										'</div>' + 
 										'<div class="eventTimestamp">' + zuluTimeToTimestamp(gameEventZulu) + '</div>' + 
 										
@@ -366,6 +368,7 @@ function displayEvents() {
 						
 						gameEvent.hover(
 							function() {
+								
 								var focusButton = $(
 									'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20">' +
 									'<defs>' +
@@ -378,6 +381,19 @@ function displayEvents() {
 									'<polygon fill="white" stroke="white" stroke-width="0" points="7,6 14,10 7,14 9,10" />' +
 									'</svg>'
 								);
+								var unfocusButton = $(
+									'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20">' +
+									'<defs>' +
+									'<radialGradient id="unfocusButtonBG" cx="50%" cy="50%" r="50%">' + 
+									'<stop id="unfocusButtonBG_innerColor" offset="0%" stop-color="rgb(208,208,208)" />' +
+									'<stop id="unfocusButtonBG_outerColor" offset="100%" stop-color="rgb(176,176,176)" />' +
+									'</radialGradient>' +
+									'</defs>' +
+									"<circle fill=\"url('#unfocusButtonBG')\" stroke-width=\"0\" cx=\"10\" cy=\"10\" r=\"10\" />'" +
+									'<polygon fill="white" stroke="white" stroke-width="0" points="13,6 7,10 13,14 11,10" />' +
+									'</svg>'
+								);
+								
 								focusButton.hover(
 									function() { 
 										$('#focusButtonBG_innerColor').attr('stop-color', 'rgb(208,208,255)');
@@ -386,7 +402,19 @@ function displayEvents() {
 									function() {
 										$('#focusButtonBG_innerColor').attr('stop-color', 'rgb(208,208,208)');
 										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(176,176,176)');
-									});
+								}
+								);
+								unfocusButton.hover(
+									function() { 
+										$('#unfocusButtonBG_innerColor').attr('stop-color', 'rgb(208,208,255)');
+										$('#unfocusButtonBG_outerColor').attr('stop-color', 'rgb(160,160,255)');
+									}, 
+									function() {
+										$('#unfocusButtonBG_innerColor').attr('stop-color', 'rgb(208,208,208)');
+										$('#unfocusButtonBG_outerColor').attr('stop-color', 'rgb(176,176,176)');
+									}
+								);
+								
 								focusButton.mousedown(function(e) {
 									if (e.which == 1) { 
 										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(128,128,255)'); 
@@ -397,10 +425,21 @@ function displayEvents() {
 										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(160,160,255)'); 
 									}
 								});
+								unfocusButton.mousedown(function(e) {
+									if (e.which == 1) { 
+										$('#unfocusButtonBG_outerColor').attr('stop-color', 'rgb(128,128,255)'); 
+									}
+								});
+								unfocusButton.mouseup(function(e) {
+									if (e.which == 1) { 
+										$('#unfocusButtonBG_outerColor').attr('stop-color', 'rgb(160,160,255)'); 
+									}
+								});
+								
 								focusButton.click(function(e) {
 									if (e.which == 1) {
 										var gameID = $(this).parent().parent().data('gameday');
-										$('li.gameBox').each(function() { 
+										$('#gameList > li.gameBox').each(function() { 
 											if ($(this).data('gameday') == gameID) {												
 												if ($(this).children('input.gameBoxCheckBox').prop('checked') == false) { 
 													$(this).click(); 
@@ -412,15 +451,37 @@ function displayEvents() {
 												}
 											}
 										});
-										$(window).scrollTop($(this).parent().parent().offset().top);
+										
+										// scroll to this's new position if it's outside the current window location
+										var newPosition = $(this).parent().parent().offset().top;
+										var windowTop = $(window).scrollTop();
+										if (newPosition < windowTop || newPosition > windowTop + $(window).outerHeight()) {
+											$(window).scrollTop($(this).parent().parent().offset().top);
+										}
 									}
 								});
-								$(this).children('.eventIcon').append(focusButton);
+								unfocusButton.click(function(e) {
+									if (e.which == 1) { 
+										$('#selectAll').click(); 
+										
+										// scroll to this's new position if it's outside the current window location
+										var newPosition = $(this).parent().parent().offset().top;
+										var windowTop = $(window).scrollTop();
+										if (newPosition < windowTop || newPosition > windowTop + $(window).outerHeight()) {
+											$(window).scrollTop($(this).parent().parent().offset().top);
+										}
+									}
+								});
+								
+								$(this).children('.eventFocus').append(focusButton);
+								$(this).children('.eventUnfocus').append(unfocusButton);
 							},
 							function() {
-								$(this).children('.eventIcon').empty();
+								$(this).children('.eventFocus').empty();
+								$(this).children('.eventUnfocus').empty();
 							}
 						);
+						
 						$('#eventList').append(gameEvent);
 						
 						// update runner data

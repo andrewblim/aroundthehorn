@@ -83,9 +83,12 @@ li.event:hover {
 	display: table-cell;
 	width: 24px;
 	height: 24px;
-	padding: 0.5em;
 	vertical-align: middle;
+	cursor: pointer;
 }
+
+.eventUnfocus { padding-left: 0.5em; padding-right: 0.25em; }
+.eventFocus { padding-right: 0.5em; padding-right: 0.25em; }
 
 .eventTimestamp {
 	display: table-cell;
