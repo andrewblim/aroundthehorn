@@ -24,8 +24,9 @@ function zuluTimeToTimestamp(zuluTime) {
 	}
 	catch (err) { return undefined; }
 	
-	if (zuluTimeLocal.valueOf() < asOfDate.valueOf()) { retString = '(-1d) '; }
-	else if (zuluTimeLocal.valueOf() > asOfDate.valueOf()) { retString += '(+1d) '; }
+	var dayGap = daysBetween(zuluTimeLocal, asOfDate);
+	if (dayGap > 0) { retString = '(-' + daysBetween(asOfDate, zuluTimeLocal) + 'd) '; }
+	else if (dayGap < 0) { retString = '(+' + daysBetween(asOfDate, zuluTimeLocal) + 'd) '; }
 	
 	var hours = ((zuluTimeLocal.getHours() + 11) % 12) + 1;
 	
