@@ -36,6 +36,9 @@ $(document).ready(function() {
 		else { localStorage['aroundthehorn_otherTeams'] = false; }
 		localStorage['aroundthehorn_dateRollOffset'] = $('#dateRollOffset').attr('value') * 60 * 60 * 1000;
 		
+		var saveMessage = $('<span id="saveMessage">Settings saved.</span>');
+		$(this).after(saveMessage);
+		
 	});
 	
 	$('#selectAll').click(function() {
@@ -62,5 +65,7 @@ $(document).ready(function() {
 	if (localStorage['aroundthehorn_otherTeams'] == 'true') { $('#otherTeams').prop('checked', true); }
 	else { $('#otherTeams').prop('checked', false); }
 	$('#dateRollOffset').attr('value', localStorage['aroundthehorn_dateRollOffset'] / 60 / 60 / 1000);
+	
+	$('input[id!=saveSettings]').click(function() { $('#saveMessage').remove(); });
 	
 })

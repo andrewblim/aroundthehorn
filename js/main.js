@@ -1,8 +1,8 @@
 
-function setAsOfDate(date) {
+function parseAsOfDate(date) {
 	var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	$("#asOfDate").attr("value", dayNames[date.getDay()] + ' ' + date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear());
+	return dayNames[date.getDay()] + ' ' + date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
 }
 
 function zuluTimestampToDate(zuluTime) {
@@ -14,7 +14,7 @@ function zuluTimestampToDate(zuluTime) {
 	catch (err) { return undefined; }
 }
 
-function zuluTimeToString(zuluTime) {
+function zuluTimeToTimestamp(zuluTime) {
 	
 	var zuluTimeLocal; 
 	var retString = '';
@@ -45,13 +45,13 @@ function zuluTimeToString(zuluTime) {
 
 function populateScoreboard() {
 	
-	asOfDate = new Date(Date.parse($("#asOfDate").attr("value")));
+	asOfDate = new Date(Date.parse($('#asOfDate').attr('value')));
 	
 	var scoreboardURL = gamedayURL + 
-						"/year_" + asOfDate.getFullYear() + 
-						"/month_" + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
-						"/day_" + padNumber(asOfDate.getDate(), 0, 2) + 
-						"/miniscoreboard.xml";
+						'/year_' + asOfDate.getFullYear() + 
+						'/month_' + padNumber(asOfDate.getMonth() + 1, 0, 2) + 
+						'/day_' + padNumber(asOfDate.getDate(), 0, 2) + 
+						'/miniscoreboard.xml';
 	
 	$('#eventList').empty();
 	
@@ -63,9 +63,9 @@ function populateScoreboard() {
 			
 			var gameBox = $('<li class="gameBox" />');
 			gameBox.data('id', $(this).attr('id'));
-			gameBox.data('gameday', $(this).attr('id').replace(/[\-\/]/g, '_'));
-			// not sure why $(this).attr('gameday') doesn't work
+			gameBox.data('gameday', $(this).attr('id').replace(/[\-\/]/g, '_'));   // unsure why $(this).attr('gameday') doesn't work
 			gameBox.attr('id', 'gameBox_' + gameBox.data('gameday'));
+			
 			gameBox.data('homeTeam', $(this).attr('home_name_abbrev'));
 			gameBox.data('awayTeam', $(this).attr('away_name_abbrev'));
 			gameBox.data('homeTeamR', $(this).attr('home_team_runs'));
@@ -75,7 +75,7 @@ function populateScoreboard() {
 			var ampm = 0, timeRaw;
 			if ($(this).attr('ampm').toUpperCase() == "PM") { ampm = 12; }
 			timeRaw =  /(\d+):(\d\d)/.exec($(this).attr('time'));
-			gameBox.data('startTime', asOfDate.valueOf() + ((timeRaw[1] + ampm) * 60 + timeRaw[2]) * 1000);
+			gameBox.data('startTime', asOfDate.valueOf() + (((timeRaw[1] == 12 ? 0 : timeRaw[1]) + ampm) * 60 + timeRaw[2]) * 1000);
 			
 			var gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
 			if (localStorage['aroundthehorn_' + gameBox.data('homeTeam')] == 'true' ||
@@ -108,14 +108,17 @@ function populateScoreboard() {
 				if (topInning.toLowerCase() == 'y') { gameBoxStatus.text('Top ' + numberToOrdinal(inning)); }
 				else { gameBoxStatus.text('Bot ' + numberToOrdinal(inning)); }
 			}
-			else if (gameStatus == "final" || gameStatus == "game over" || gameStatus == "completed early") {
+			else if (gameStatus == 'final' || gameStatus == 'game over' || gameStatus == 'completed early') {
 				if (inning != 9) { gameBoxStatus.text('Final (' + inning + ')'); }
 				else { gameBoxStatus.text('Final'); gameBox.data('complete', true); }
 			}
-			else if (gameStatus == "preview") {
+			else if (gameStatus == 'delay') {
+				gameBoxStatus.text('Delay');
+			}
+			else if (gameStatus == 'preview') {
 				gameBoxStatus.text($(this).attr('time') + ' ' + $(this).attr('ampm') + ' ' + $(this).attr('time_zone'));
 			}
-			else if (gameStatus == "pre-game" || gameStatus == "warmup") {
+			else if (gameStatus == 'pre-game' || gameStatus == 'warmup') {
 				gameBoxStatus.text('Pregame');
 			}
 			else if (gameStatus != undefined) {
@@ -143,7 +146,7 @@ function populateScoreboard() {
 		
 		$('#gameList > li.gameBox').tsort({
 			sortFunction: function(a,b) {
-				if (a.e.data('startTime') != b.e.data('startTime')) { 
+				if (a.e.data('startTime') != b.e.data('startTime')) {  
 					return a.e.data('startTime') - b.e.data('startTime');
 				}
 				else if (a.e.data('awayTeam') > b.e.data('awayTeam')) { return 1; }
@@ -304,7 +307,7 @@ function displayEvents() {
 						if (isVisible == false) { gameEvent.css('display', 'none'); }
 						
 						gameEvent.append($(
-										'<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>' + 
+										'<div class="eventTimestamp">' + zuluTimeToTimestamp(gameEventZulu) + '</div>' + 
 										
 										'<div class="eventScoreboard">' + 
 										'<div class="eventScoreboardInning">' +
@@ -432,11 +435,7 @@ $(document).ready(function() {
 	
 	setDefaultsIfUndefined();
 	
-	var asOfDate = new Date(Date.now() - Number(localStorage['aroundthehorn_dateRollOffset']));
-	var scoreboardData;
-	
-	var timer;
-	
+	// var timer;
 	$('#loadStatus').ajaxStart(function() {
 		// timer = (new Date()).valueOf();
 		$('#progressBar').progressbar({ value: 0 });
@@ -447,18 +446,6 @@ $(document).ready(function() {
 		$(this).text('Ready');
 		// alert(((new Date()).valueOf() - timer)/1000);
 	});
-
-	$('#asOfDate').datepicker({
-		dateFormat: 'D d M yy',
-		defaultDate: +0,
-		changeMonth: true,
-		changeYear: true
-	});
-	
-	$('#asOfDate').change(populateScoreboard);
-	
-	setAsOfDate(asOfDate);
-	populateScoreboard();
 	
 	$('#selectAll').click(function() { 
 		$('li.gameBox').each(function() { 
@@ -476,5 +463,20 @@ $(document).ready(function() {
 	});
 	
 	$('#progressBar').progressbar({ value: 100 });
+
+	var asOfDate = new Date(Date.now() - Number(localStorage['aroundthehorn_dateRollOffset']));
+	var scoreboardData;
+	
+	$('#asOfDate').datepicker({
+		dateFormat: 'D d M yy',
+		defaultDate: +0,
+		changeMonth: true,
+		changeYear: true
+	});
+	
+	$('#asOfDate').change(populateScoreboard);
+	$('#asOfDate').attr('value', parseAsOfDate(asOfDate));
+	
+	populateScoreboard();
 	
 });
