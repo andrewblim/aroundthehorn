@@ -96,7 +96,13 @@ function populateScoreboard() {
 			gameBox.data('startTime', asOfDate.valueOf() + ((timeRaw[1] + ampm) * 60 + timeRaw[2]) * 1000);
 			
 			var gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
-			gameBoxCheckBox.prop('checked', true);
+			if (localStorage['aroundthehorn_' + gameBox.data('homeTeam')] == 'true' ||
+				localStorage['aroundthehorn_' + gameBox.data('awayTeam')] == 'true') {
+				gameBoxCheckBox.prop('checked', true);
+			}
+			else {
+				gameBoxCheckBox.prop('checked', false);
+			}
 			gameBox.append(gameBoxCheckBox);
 			
 			var gameBoxData;
@@ -428,7 +434,7 @@ function displayEvents() {
 
 $(document).ready(function() {
 	
-	var asOfDate = new Date();
+	var asOfDate = new Date(Date.now() - Number(localStorage['aroundthehorn_dateRollOffset']));
 	var scoreboardData;
 	
 	var timer;

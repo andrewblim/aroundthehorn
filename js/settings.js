@@ -62,6 +62,13 @@ $(document).ready(function() {
 		
 	});
 	
+	$('#selectAll').click(function() {
+		$('ul.teamSelectBoxDivisionList > li > input[type=checkbox]').prop('checked', true);
+	});
+	$('#deselectAll').click(function() {
+		$('ul.teamSelectBoxDivisionList > li > input[type=checkbox]').prop('checked', false);
+	});
+	
 	setDefaultsIfUndefined();
 	createTeamCheckboxes();
 	
