@@ -65,6 +65,7 @@ function populateScoreboard() {
 			gameBox.data('id', $(this).attr('id'));
 			gameBox.data('gameday', $(this).attr('id').replace(/[\-\/]/g, '_'));
 			// not sure why $(this).attr('gameday') doesn't work
+			gameBox.attr('id', 'gameBox_' + gameBox.data('gameday'));
 			gameBox.data('homeTeam', $(this).attr('home_name_abbrev'));
 			gameBox.data('awayTeam', $(this).attr('away_name_abbrev'));
 			gameBox.data('homeTeamR', $(this).attr('home_team_runs'));
@@ -123,7 +124,7 @@ function populateScoreboard() {
 			gameBoxData.append(gameBoxStatus);
 			
 			gameBox.click(function() { 
-				var checkBox = $($(this).children('input'));
+				var checkBox = $($(this).children('input[type=checkbox]'));
 				if (checkBox.prop('checked')) { 
 					checkBox.prop('checked', false);
 					$('li.' + $(this).data('gameday')).css('display', 'none'); 
@@ -166,6 +167,12 @@ function displayEvents() {
 		// uncomment to debug on single games
 		// if ($(this).data('gameday') != "2012_03_29_minmlb_pitmlb_1") { return; }
 		// if ($(this).data('homeTeam') != 'BOS' && $(this).data('awayTeam') != 'BOS') { return; }
+		
+		var isVisible;
+		if ($('#gameBox_' + $(this).data('gameday') + ' > input[type=checkbox]').prop('checked') == true) {
+			isVisible = true;
+		}
+		else { isVisible = false; }
 		
 		var gameURL = gamedayURL + 
 					  "/year_" + asOfDate.getFullYear() +
@@ -291,6 +298,7 @@ function displayEvents() {
 						
 						var gameEvent = $('<li class="event ' + gameID + '" />');
 						gameEvent.data('zulu', gameEventZulu.valueOf());
+						if (isVisible == false) { gameEvent.css('display', 'none'); }
 						
 						gameEvent.append($(
 										'<div class="eventTimestamp">' + zuluTimeToString(gameEventZulu) + '</div>' + 
