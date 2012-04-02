@@ -307,6 +307,7 @@ function displayEvents() {
 						
 						var gameEvent = $('<li class="event ' + gameID + '" />');
 						gameEvent.data('zulu', gameEventZulu.valueOf());
+						gameEvent.data('gameday', gameID);
 						if (isVisible == false) { gameEvent.css('display', 'none'); }
 						
 						gameEvent.append($(
@@ -369,8 +370,8 @@ function displayEvents() {
 									'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20">' +
 									'<defs>' +
 									'<radialGradient id="focusButtonBG" cx="50%" cy="50%" r="50%">' + 
-									'<stop offset="0%" stop-color="rgb(211,211,211)" />' +
-									'<stop offset="100%" stop-color="rgb(192,192,192)" />' +
+									'<stop id="focusButtonBG_innerColor" offset="0%" stop-color="rgb(208,208,208)" />' +
+									'<stop id="focusButtonBG_outerColor" offset="100%" stop-color="rgb(176,176,176)" />' +
 									'</radialGradient>' +
 									'</defs>' +
 									"<circle fill=\"url('#focusButtonBG')\" stroke-width=\"0\" cx=\"10\" cy=\"10\" r=\"10\" />'" +
@@ -379,13 +380,41 @@ function displayEvents() {
 								);
 								focusButton.hover(
 									function() { 
-										$(this).find('stop[offset="0%"]').attr('stop-color', 'rgb(211,211,255)');
-										$(this).find('stop[offset="100%"]').attr('stop-color', 'rgb(192,192,255)');
+										$('#focusButtonBG_innerColor').attr('stop-color', 'rgb(208,208,255)');
+										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(160,160,255)');
 									}, 
 									function() {
-										$(this).find('stop[offset="0%"]').attr('stop-color', 'rgb(211,211,211)');
-										$(this).find('stop[offset="100%"]').attr('stop-color', 'rgb(192,192,192)');
+										$('#focusButtonBG_innerColor').attr('stop-color', 'rgb(208,208,208)');
+										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(176,176,176)');
 									});
+								focusButton.mousedown(function(e) {
+									if (e.which == 1) { 
+										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(128,128,255)'); 
+									}
+								});
+								focusButton.mouseup(function(e) {
+									if (e.which == 1) { 
+										$('#focusButtonBG_outerColor').attr('stop-color', 'rgb(160,160,255)'); 
+									}
+								});
+								focusButton.click(function(e) {
+									if (e.which == 1) {
+										var gameID = $(this).parent().parent().data('gameday');
+										$('li.gameBox').each(function() { 
+											if ($(this).data('gameday') == gameID) {												
+												if ($(this).children('input.gameBoxCheckBox').prop('checked') == false) { 
+													$(this).click(); 
+												}
+											}
+											else {
+												if ($(this).children('input.gameBoxCheckBox').prop('checked') == true) { 
+													$(this).click(); 
+												}
+											}
+										});
+										$(window).scrollTop($(this).parent().parent().offset().top);
+									}
+								});
 								$(this).children('.eventIcon').append(focusButton);
 							},
 							function() {
