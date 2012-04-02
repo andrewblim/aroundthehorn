@@ -364,19 +364,30 @@ function displayEvents() {
 										));
 						
 						gameEvent.hover(
-							function() {	
-								$(this).children('.eventIcon').append($(
+							function() {
+								var focusButton = $(
 									'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20">' +
 									'<defs>' +
 									'<radialGradient id="focusButtonBG" cx="50%" cy="50%" r="50%">' + 
-									'<stop offset="0%" stop-color="silver" />' +
-									'<stop offset="100%" stop-color="gray" />' +
+									'<stop offset="0%" stop-color="rgb(211,211,211)" />' +
+									'<stop offset="100%" stop-color="rgb(192,192,192)" />' +
 									'</radialGradient>' +
 									'</defs>' +
 									"<circle fill=\"url('#focusButtonBG')\" stroke-width=\"0\" cx=\"10\" cy=\"10\" r=\"10\" />'" +
-									'<polygon fill="white" stroke-width="0" points="7,6 14,10 7,14 9,10" />' +
+									'<polygon fill="white" stroke="white" stroke-width="0" points="7,6 14,10 7,14 9,10" />' +
 									'</svg>'
-									))},
+								);
+								focusButton.hover(
+									function() { 
+										$(this).find('stop[offset="0%"]').attr('stop-color', 'rgb(211,211,255)');
+										$(this).find('stop[offset="100%"]').attr('stop-color', 'rgb(192,192,255)');
+									}, 
+									function() {
+										$(this).find('stop[offset="0%"]').attr('stop-color', 'rgb(211,211,211)');
+										$(this).find('stop[offset="100%"]').attr('stop-color', 'rgb(192,192,192)');
+									});
+								$(this).children('.eventIcon').append(focusButton);
+							},
 							function() {
 								$(this).children('.eventIcon').empty();
 							}
