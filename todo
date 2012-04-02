@@ -1,13 +1,13 @@
 
+For this version: 
 - add quick-click single-game focus
-
-- add a player filter
 - make it update live
-
 - add icons
-
-- populate help page
+- populate help page/add README
 - use only jqueryui necessary
+
+For next version: 
+- add a player filter
 
 Known bugs:
 

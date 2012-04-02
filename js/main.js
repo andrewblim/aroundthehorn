@@ -53,6 +53,9 @@ function populateScoreboard() {
 						'/day_' + padNumber(asOfDate.getDate(), 0, 2) + 
 						'/miniscoreboard.xml';
 	
+	var teamList = [];
+	for (var division in teams) { teamList = teamList.concat(teams[division]); }
+	
 	$('#eventList').empty();
 	
 	$.get(scoreboardURL, function(data) { 
@@ -80,6 +83,10 @@ function populateScoreboard() {
 			var gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
 			if (localStorage['aroundthehorn_' + gameBox.data('homeTeam')] == 'true' ||
 				localStorage['aroundthehorn_' + gameBox.data('awayTeam')] == 'true') {
+				gameBoxCheckBox.prop('checked', true);
+			}
+			else if (localStorage['aroundthehorn_otherTeams'] == 'true' && 
+					($.inArray(gameBox.data('homeTeam'), teamList) == -1 || $.inArray(gameBox.data('awayTeam'), teamList) == -1)) {
 				gameBoxCheckBox.prop('checked', true);
 			}
 			else {
