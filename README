@@ -10,7 +10,7 @@ INSTALLATION
 
 To install, open the file aroundthehorn.crx with Chrome. 
 
-The first time you run Around the Horn, Chrome will ask you if you want to allow the extension to see data on gd2.mlb.com. This is MLB's server where game events are posted in XML format, so you will need to grant permissions for Around the Horn to function properly. 
+When you install Around the Horn, Chrome will ask you if you want to allow the extension to see "your" data on gd2.mlb.com. This is MLB's server where game events are posted in XML format, so you will need to grant permissions for Around the Horn to function properly. I don't expect that you would have any personal data on this server except possibly if you work for MLB, and even then, I wouldn't expect it. 
 
 MISCELLANY
 
