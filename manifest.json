@@ -10,5 +10,10 @@
 	},
 	"permissions": [
 		"http://gd2.mlb.com/"
-	]
+	],
+	"icons": {
+		"16": "aroundthehorn_icon16.png"
+		"48": "aroundthehorn_icon48.png"
+		"128": "aroundthehorn_icon128.png"
+	}
 }
