@@ -19,9 +19,7 @@ function zuluTimeToTimestamp(zuluTime) {
 	var zuluTimeLocal; 
 	var retString = '';
 	
-	try {
-		zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000);
-	}
+	try { zuluTimeLocal = new Date(zuluTime.valueOf() - zuluTime.getTimezoneOffset() * 60 * 1000); }
 	catch (err) { return undefined; }
 	
 	var dayGap = daysBetween(zuluTimeLocal, asOfDate);
@@ -102,18 +100,12 @@ function populateScoreboard() {
 				if (inning != 9) { gameBoxStatus.text('Final (' + inning + ')'); }
 				else { gameBoxStatus.text('Final'); gameBox.data('complete', true); }
 			}
-			else if (gameStatus == 'delay') {
-				gameBoxStatus.text('Delay');
-			}
 			else if (gameStatus == 'preview') {
 				gameBoxStatus.text($(this).attr('time') + ' ' + $(this).attr('ampm') + ' ' + $(this).attr('time_zone'));
 			}
-			else if (gameStatus == 'pre-game' || gameStatus == 'warmup') {
-				gameBoxStatus.text('Pregame');
-			}
-			else if (gameStatus != undefined) {
-				gameBoxStatus.text(gameStatus);
-			}
+			else if (gameStatus == 'pre-game' || gameStatus == 'warmup') { gameBoxStatus.text('Pregame'); }
+			else if (gameStatus == 'delay') { gameBoxStatus.text('Delay'); }
+			else if (gameStatus != undefined) { gameBoxStatus.text(gameStatus); }
 			else { gameBoxStatus.html('&nbsp;') }
 			gameBoxData.append(gameBoxStatus);
 			
@@ -121,11 +113,11 @@ function populateScoreboard() {
 				var checkBox = $($(this).children('input[type=checkbox]'));
 				if (checkBox.prop('checked')) { 
 					checkBox.prop('checked', false);
-					$('li.' + $(this).data('gameday')).css('display', 'none'); 
+					$('#eventList > li.' + $(this).data('gameday')).css('display', 'none'); 
 				}
 				else { 
 					checkBox.prop('checked', true); 
-					$('li.' + $(this).data('gameday')).css('display', 'table-row'); 
+					$('#eventList > li.' + $(this).data('gameday')).css('display', 'table-row'); 
 				}
 			});
 			
@@ -136,9 +128,7 @@ function populateScoreboard() {
 		
 		$('#gameList > li.gameBox').tsort({
 			sortFunction: function(a,b) {
-				if (a.e.data('startTime') != b.e.data('startTime')) {  
-					return a.e.data('startTime') - b.e.data('startTime');
-				}
+				if (a.e.data('startTime') != b.e.data('startTime')) {  return a.e.data('startTime') - b.e.data('startTime'); }
 				else if (a.e.data('awayTeam') > b.e.data('awayTeam')) { return 1; }
 				else if (a.e.data('awayTeam') < b.e.data('awayTeam')) { return -1; }
 				else if (a.e.data('homeTeam') > b.e.data('homeTeam')) { return 1; }
