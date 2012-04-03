@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="128" height="128">
+	<defs>
+		<linearGradient id="plateBorder" gradientUnits="userSpaceOnUse" x1="0" y1="128" x2="128" y2="0">
+			<stop offset="50%" stop-color="black" />
+			<stop offset="100%" stop-color="darkslategray" />
+		</linearGradient>
+		<linearGradient id="plate" gradientUnits="userSpaceOnUse" x1="0" y1="128" x2="128" y2="0">
+			<stop offset="0%" stop-color="silver" />
+			<stop offset="50%" stop-color="white" />
+		</linearGradient>
+	</defs>
+	<polygon fill="url(#plateBorder)" stroke="none" stroke-width="0" points="0,0 128,0 128,64 64,128 0,64" />
+	<polygon fill="url(#plate)" stroke="none" stroke-width="0" points="5,5 123,5 123,62 64,119 5,62" />
+</svg>
