@@ -264,11 +264,17 @@ function displayEvents() {
 							if ($(this).nextAll('atbat').length > 0) {
 							 	batterID = $(this).nextAll('atbat').first().attr('batter');
 								pitcherID = $(this).nextAll('atbat').first().attr('pitcher');
+								
+								// this prevents inning-ending CS from being duped
+								if ($(this).nextAll('atbat').first().attr('des') == $(this).attr('des') &&
+									$(this).nextAll('atbat').first().attr('event').toLowerCase() == 'runner out') {
+									return;
+								}
 							}
 							
-							// Pinch runners are a problem... I don't see anywhere in the XML file where it is 
-							// explicitly stated who is replacing whom (surprised it's not done with <runner>
-							// tags). So I'm backing it out of the description, not ideal, I know. 
+							// Pinch runners: I don't see anywhere in the XML file where it is explicitly stated 
+							// who is replacing whom (surprised it's not done with <runner> tags). So I'm backing 
+							// it out of the description, which is not ideal, I know. 
 							
 							var pinchRunnerData = /Pinch runner (\S+) (\S+) replaces (\S+) (\S+)\./.exec(gameEventText);
 							if (pinchRunnerData != null) {
@@ -322,11 +328,11 @@ function displayEvents() {
 										'<div class="eventScoreboardWrap">' +
 										'<div class="eventScoreboardAway">' + 
 										'<div class="eventScoreboardTeam">' + awayTeam + '</div>' +
-										'<div class="eventScoreboardScore' + (awayRchanged ? ' scoreChanged' : '') + '">' + awayR + '</div>' +
+										'<div class="eventScoreboardScore' + (awayRchanged ? ' scoreboardHighlight' : '') + '">' + awayR + '</div>' +
 										'</div>' +
 										'<div class="eventScoreboardHome">' + 
 										'<div class="eventScoreboardTeam">' + homeTeam + '</div>' +
-										'<div class="eventScoreboardScore' + (homeRchanged ? ' scoreChanged' : '') + '">' + homeR + '</div>' +
+										'<div class="eventScoreboardScore' + (homeRchanged ? ' scoreboardHighlight' : '') + '">' + homeR + '</div>' +
 										'</div>' +
 										'</div>' +
 										'</div>' +
@@ -345,7 +351,7 @@ function displayEvents() {
 										'</div>' +
 										
 										'<div class="eventAtBat">' +
-										'<div class="eventAtBatWrap ' + (outs == 3 ? ' eventAtBatThirdOut' : '') + '">' +
+										'<div class="eventAtBatWrap' + (outs == 3 ? ' eventAtBatThirdOut' : '') + '">' +
 										'<div class="eventAtBatPosition">' + 
 										'<div class="eventAtBatLabel">1st:</div>' +
 										'<div class="eventAtBatPlayer">' + (onFirstID == '' ? '' : players[onFirstID].shortName) + '</div>' +

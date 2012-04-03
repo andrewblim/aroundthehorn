@@ -130,7 +130,7 @@ li.event:hover {
 	width: 2em;
 }
 
-.scoreChanged { color: red; }
+.scoreboardHighlight { color: red; }
 
 .eventAtBat {
 	display: table-cell;
@@ -141,7 +141,7 @@ li.event:hover {
 
 .eventAtBatWrap { display: table; }
 .eventAtBatPosition { display: table-row; }
-.eventAtBatThirdOut { color: #A0A0A0; text-decoration: line-through; }
+.eventAtBatThirdOut { color: #A0A0A0; }
 
 .eventAtBatLabel {
 	display: table-cell;
