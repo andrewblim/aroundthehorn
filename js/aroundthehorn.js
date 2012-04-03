@@ -29,6 +29,7 @@ function setDefaultsIfUndefined() {
 			}
 		}
 	}
+	if (localStorage['aroundthehorn_autoRefreshInterval'] == undefined) { localStorage['aroundthehorn_autoRefreshInterval'] = 0; }
 	if (localStorage['aroundthehorn_dateRollOffset'] == undefined) { localStorage['aroundthehorn_dateRollOffset'] = 0; }
 	if (localStorage['aroundthehorn_otherTeams'] == undefined) { localStorage['aroundthehorn_otherTeams'] = true; }
 	

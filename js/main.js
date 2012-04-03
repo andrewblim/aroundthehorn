@@ -568,6 +568,7 @@ $(document).ready(function() {
 	$('#loadStatus').ajaxStop(function() {
 		$('#progressBar').progressbar({ value: 100 });
 		$(this).text('Ready');
+		if (localStorage['aroundthehorn_autoRefreshInterval'] > 0) { setTimeout('location.reload()', localStorage['aroundthehorn_autoRefreshInterval']); }
 		// alert(((new Date()).valueOf() - timer)/1000);
 	});
 	
