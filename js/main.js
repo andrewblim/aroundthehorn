@@ -50,9 +50,6 @@ function populateScoreboard() {
 						'/day_' + padNumber(asOfDate.getDate(), 0, 2) + 
 						'/miniscoreboard.xml';
 	
-	var teamList = [];
-	for (var division in teams) { teamList = teamList.concat(teams[division]); }
-	
 	$('#eventList').empty();
 	
 	$.get(scoreboardURL, function(data) { 
@@ -78,17 +75,6 @@ function populateScoreboard() {
 			gameBox.data('startTime', asOfDate.valueOf() + (((timeRaw[1] == 12 ? 0 : timeRaw[1]) + ampm) * 60 + timeRaw[2]) * 1000);
 			
 			var gameBoxCheckBox = $('<input class="gameBoxCheckBox" type="checkbox" />');
-			if (localStorage['aroundthehorn_' + gameBox.data('homeTeam')] == 'true' ||
-				localStorage['aroundthehorn_' + gameBox.data('awayTeam')] == 'true') {
-				gameBoxCheckBox.prop('checked', true);
-			}
-			else if (localStorage['aroundthehorn_otherTeams'] == 'true' && 
-					($.inArray(gameBox.data('homeTeam'), teamList) == -1 || $.inArray(gameBox.data('awayTeam'), teamList) == -1)) {
-				gameBoxCheckBox.prop('checked', true);
-			}
-			else {
-				gameBoxCheckBox.prop('checked', false);
-			}
 			gameBox.append(gameBoxCheckBox);
 			
 			var gameBoxData;
@@ -161,8 +147,29 @@ function populateScoreboard() {
 			}
 		});
 		
+		checkDefaultGameBoxes();
 		displayEvents();
 	});
+}
+
+function checkDefaultGameBoxes() {
+	
+	var teamList = [];
+	for (var division in teams) { teamList = teamList.concat(teams[division]); }
+	
+	$('#gameList > li.gameBox > input[type="checkbox"]').each(function() {
+		if (localStorage['aroundthehorn_' + $(this).parent().data('homeTeam')] == 'true' ||
+			localStorage['aroundthehorn_' + $(this).parent().data('awayTeam')] == 'true' ||
+			(localStorage['aroundthehorn_otherTeams'] == 'true' && 
+				($.inArray($(this).parent().data('homeTeam'), teamList) == -1 || 
+				 $.inArray($(this).parent().data('awayTeam'), teamList) == -1))) {
+			if ($(this).prop('checked') == false) { $(this).parent().click(); };
+		}
+		else {
+			if ($(this).prop('checked') == true) { $(this).parent().click(); };
+		}
+	});
+	
 }
 
 function displayEvents() {
@@ -457,13 +464,15 @@ function displayEvents() {
 										var newPosition = $(this).parent().parent().offset().top;
 										var windowTop = $(window).scrollTop();
 										if (newPosition < windowTop || newPosition > windowTop + $(window).outerHeight()) {
-											$(window).scrollTop($(this).parent().parent().offset().top);
+											$(window).scrollTop(Math.min($(this).parent().parent().offset().top));
 										}
 									}
 								});
 								unfocusButton.click(function(e) {
 									if (e.which == 1) { 
-										$('#selectAll').click(); 
+										
+										checkDefaultGameBoxes();
+										//$('#selectAll').click(); 
 										
 										// scroll to this's new position if it's outside the current window location
 										var newPosition = $(this).parent().parent().offset().top;
